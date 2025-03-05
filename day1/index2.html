@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>과제</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 80%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+        }
+
+    </style>
+</head>
+<body>
+    <div>
+        <button id="allBtn">전체보기</button>
+        <button id="tenBtn">10개씩 보기</button>
+        <button id="twentyBtn">20개씩 보기</button>
+    </div>
+    <div id="genderRatio"></div>
+    <table>
+        <thead>
+            <tr>
+                <th>10대</th>
+                <th>20대</th>
+                <th>30대</th>
+                <th>40대</th>
+                <th>50대 이상</th>
+            </tr>
+        </thead>
+        <tbody id="ageGroupTableBody">
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>번호</th>
+                <th>이름</th>
+                <th>나이</th>
+                <th>성별</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <script src="day1-2.js"></script>
+</body>
+</html>
