@@ -56,8 +56,8 @@ function calculateGenderRatio(data) {
     let maleCount = data.filter(item => item.gender === 0).length;
     let femaleCount = data.filter(item => item.gender === 1).length;
     let totalCount = data.length;
-    let maleRatio = (maleCount / totalCount).toFixed(2) * 100;
-    let femaleRatio = (femaleCount / totalCount).toFixed(2) * 100;
+    let maleRatio = (maleCount / totalCount * 100).toFixed(0);
+    let femaleRatio = 100 - maleRatio;
     genderRatioDiv.innerHTML = `남성 / 여성 ${maleRatio}% / ${femaleRatio}%`;
 }
 
