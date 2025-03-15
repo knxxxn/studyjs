@@ -1,3 +1,16 @@
+// 투두 리스트 만들기 - hook 사용
+// 1. 경로는 /todo
+// 2. todo 객체는 아래 형식
+// {
+// id: date(현재 날짜),
+// text: string,
+// completed: boolean
+// }
+// 3. todo 추가, 완료, 삭제 기능
+// 추가 시 todo 추가
+// 완료 시 todo text의 css 변경, 버튼 변경(임의로)
+// 삭제 시 todo 삭제
+
 import React, { useRef } from 'react';
 import TodoInput from '../components/TodoInput';
 import TodoList from '../components/TodoList';

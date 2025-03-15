@@ -1,3 +1,5 @@
+//강의 자료 예제 따라해보기
+
 import React from "react";
 import { useRef } from "react";
 import { useState } from "react";
