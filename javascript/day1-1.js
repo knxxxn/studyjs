@@ -14,7 +14,7 @@ searchBtn.addEventListener("click", async () => {
     const phoneNumber = phoneNumberInput.value;
 
     try {
-        const response = await fetch('https://refund.atoncorp.com:3101/javascript/table/data');
+        const response = await fetch('링크 올리기');
 
         if (response.status === 200) {
             const data = await response.json();
