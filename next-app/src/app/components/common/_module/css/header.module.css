@@ -1,0 +1,15 @@
+.container {
+  position: absolute;
+  right: 0;
+}
+
+.modeWrap {
+  display: flex;
+  padding: 10px 10px 0 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  padding-left: 10px;
+}
