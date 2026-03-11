@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch, watchEffect } from 'vue';
 
 // React의 function About() { return (...) } 과 동일
 const inputRef = ref<HTMLInputElement | null>(null);
@@ -20,6 +20,10 @@ const count = ref(0);
 const focusInput = () => {
   inputRef.value?.focus();
 };
+
+watchEffect(() => { //렌더링 될 때마다 실행되는 함수
+  console.log('vue 컴포넌트가 랜더링됨!');
+});
 </script>
 
 <!-- Vue의 <template>안에서는 중괄호 {}를 이용해 속성에 자바스크립트 값을 전달하는 React 방식(onClick={...})이 동작하지 않습니다. 

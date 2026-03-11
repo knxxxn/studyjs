@@ -14,7 +14,7 @@ function About() {
   const [count, setCount] = useState(0); //useState 예제
 
   useEffect(() => {
-    console.log("컴포넌트가 렌더링됨!");
+    console.log("react 컴포넌트가 렌더링됨!");
   });
 
   return (
