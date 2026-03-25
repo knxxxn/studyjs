@@ -2,7 +2,7 @@
 import { computed, ref, onMounted, watch } from 'vue'
 import { selectedDateStr, todosByDate, formatDate } from '../store.js'
 
-const serviceKey = import.meta.env.VITE_KMA_API_KEY
+const serviceKeyGlobal = import.meta.env.VITE_KMA_API_KEY // 로컬 외에는 사용되지 않습니다.
 
 // 조회 가능한 관심 지역 목록
 const regions = [
@@ -165,7 +165,13 @@ async function fetchCurrentWeather() {
     const baseTime = `${String(hours).padStart(2, '0')}30`
     const { nx, ny } = selectedRegion.value
     
-    const url = `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?serviceKey=${serviceKey}&pageNo=1&numOfRows=60&dataType=JSON&base_date=${baseDate}&base_time=${baseTime}&nx=${nx}&ny=${ny}`
+    let url = ''
+    if (import.meta.env.DEV) {
+      const serviceKey = import.meta.env.VITE_KMA_API_KEY || ''
+      url = `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?serviceKey=${serviceKey}&pageNo=1&numOfRows=60&dataType=JSON&base_date=${baseDate}&base_time=${baseTime}&nx=${nx}&ny=${ny}`
+    } else {
+      url = `/api/weather?type=ultra&pageNo=1&numOfRows=60&base_date=${baseDate}&base_time=${baseTime}&nx=${nx}&ny=${ny}`
+    }
 
     const response = await fetch(url)
     const json = await response.json()
@@ -232,7 +238,13 @@ async function fetchShortTermForecast() {
     const baseTime = `${String(validBaseHour).padStart(2, '0')}00`
     const { nx, ny } = selectedRegion.value
 
-    const url = `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=${serviceKey}&pageNo=1&numOfRows=120&dataType=JSON&base_date=${baseDate}&base_time=${baseTime}&nx=${nx}&ny=${ny}`
+    let url = ''
+    if (import.meta.env.DEV) {
+      const serviceKey = import.meta.env.VITE_KMA_API_KEY || ''
+      url = `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=${serviceKey}&pageNo=1&numOfRows=120&dataType=JSON&base_date=${baseDate}&base_time=${baseTime}&nx=${nx}&ny=${ny}`
+    } else {
+      url = `/api/weather?type=vilage&pageNo=1&numOfRows=120&base_date=${baseDate}&base_time=${baseTime}&nx=${nx}&ny=${ny}`
+    }
 
     const response = await fetch(url)
     const json = await response.json()
