@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, onMounted, watch } from 'vue'
+import { selectedDateStr, todosByDate, formatDate } from '../store.js'
 
 const serviceKey = import.meta.env.VITE_KMA_API_KEY
 
@@ -19,7 +20,19 @@ const regions = [
   { name: '청주', nx: 69, ny: 107 },
   { name: '전주', nx: 63, ny: 89 }
 ]
-const selectedRegion = ref(regions[0])
+
+// 저장된 지역 불러오기
+const savedRegion = localStorage.getItem('studyjs-weather-region')
+let initialRegion = regions[0]
+if (savedRegion) {
+  try {
+    const parsed = JSON.parse(savedRegion)
+    const found = regions.find(r => r.name === parsed.name)
+    if (found) initialRegion = found
+  } catch (e) {}
+}
+
+const selectedRegion = ref(initialRegion)
 
 const weatherData = ref({
   temperature: '--',
@@ -35,6 +48,57 @@ const timeOfDayClass = computed(() => {
   // 오전 6시 ~ 오후 6시엔 낮 테마(밝은색), 그 외는 밤 테마(어두운색) 적용
   return (hour >= 6 && hour < 18) ? 'theme-day' : 'theme-night'
 })
+
+const weatherEffectClass = computed(() => {
+  const c = weatherData.value.condition
+  if (c === '비' || c === '소나기' || c === '비/눈') return 'effect-rain'
+  if (c === '눈') return 'effect-snow'
+  if (c === '구름많음' || c === '흐림') return 'effect-cloud'
+  return ''
+})
+
+const particleContainer = ref(null)
+let particleTimer = null
+
+watch(weatherEffectClass, (val) => {
+  if (particleTimer) clearInterval(particleTimer)
+  if (particleContainer.value) particleContainer.value.innerHTML = ''
+  
+  if (val === 'effect-rain' || val === 'effect-snow') {
+    startParticles(val)
+  }
+})
+
+function startParticles(type) {
+  const container = particleContainer.value
+  if (!container) return
+  
+  const isRain = type === 'effect-rain'
+  
+  const createDrop = () => {
+    const drop = document.createElement('div')
+    drop.classList.add(isRain ? 'raindrop' : 'snowdrop')
+    drop.style.left = `${Math.random() * 100}%`
+    
+    // 눈은 더 천천히, 비는 꽤 빠르게
+    drop.style.animationDuration = isRain ? `${Math.random() * 0.4 + 0.4}s` : `${Math.random() * 2 + 3}s`
+    
+    container.appendChild(drop)
+    
+    // 애니메이션 종료 시 DOM에서 제거하여 메모리 관리
+    drop.addEventListener('animationend', () => {
+      drop.remove()
+    })
+  }
+
+  // 화면이 처음에 텅 비지 않도록 미리 생성
+  for(let i=0; i< (isRain ? 40 : 20); i++) {
+    createDrop()
+  }
+
+  // 생성 주기: 비는 40ms, 눈은 200ms
+  particleTimer = setInterval(createDrop, isRain ? 40 : 200)
+}
 
 const weatherEmoji = computed(() => {
   return getWeatherEmoji(weatherData.value.condition)
@@ -143,11 +207,9 @@ async function fetchShortTermForecast() {
     let hours = now.getHours()
     let minutes = now.getMinutes()
 
-    // 단기예보 발표 시간은 0200, 0500, 0800, 1100, 1400, 1700, 2000, 2300 입니다.
     const baseTimes = [2, 5, 8, 11, 14, 17, 20, 23]
     let baseHour = hours
     
-    // 발표 후 API 반영을 위해 넉넉히 10~15분 후로 사용
     if (minutes < 15) baseHour -= 1
     if (baseHour < 0) {
       baseHour += 24
@@ -170,8 +232,6 @@ async function fetchShortTermForecast() {
     const baseTime = `${String(validBaseHour).padStart(2, '0')}00`
     const { nx, ny } = selectedRegion.value
 
-    // 단기예보의 경우 최대 3일까지의 예보 데이터를 주며, 1시간 단위입니다.
-    // numOfRows 100을 주면 넉넉하게 당일/익일 치 데이터를 확보합니다.
     const url = `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=${serviceKey}&pageNo=1&numOfRows=120&dataType=JSON&base_date=${baseDate}&base_time=${baseTime}&nx=${nx}&ny=${ny}`
 
     const response = await fetch(url)
@@ -187,13 +247,10 @@ async function fetchShortTermForecast() {
         if (item.category === 'TMP') forecastMap[key].tmp = item.fcstValue
         if (item.category === 'SKY') forecastMap[key].sky = item.fcstValue
         if (item.category === 'PTY') forecastMap[key].pty = item.fcstValue
-        if (item.category === 'POP') forecastMap[key].pop = item.fcstValue // 강수확률
+        if (item.category === 'POP') forecastMap[key].pop = item.fcstValue 
       }
 
-      // Map을 시간순으로 정렬
       const sortedKeys = Object.keys(forecastMap).sort()
-      
-      // 현재 시간 이후의 데이터만 필터링 (가까운 순서로 10개만 추출)
       const currentFullTimeStr = `${year}${String(month).padStart(2, '0')}${String(date).padStart(2, '0')}${String(hours).padStart(2, '0')}00`
       const upcoming = sortedKeys
         .filter(k => k >= currentFullTimeStr)
@@ -203,7 +260,6 @@ async function fetchShortTermForecast() {
 
       forecastList.value = upcoming.map(f => {
         const condition = parseCondition(f.pty, f.sky)
-        // 화면에 보여줄 시간 텍스트 정리 (0900 -> 09시)
         const timeLabel = `${parseInt(f.time.slice(0, 2))}시`
         return {
           timeLabel,
@@ -219,14 +275,18 @@ async function fetchShortTermForecast() {
   }
 }
 
-// 지역이 변경될 때마다 날씨 데이터를 다시 불러옵니다.
-watch(selectedRegion, () => {
+watch(selectedRegion, (newRegion) => {
+  localStorage.setItem('studyjs-weather-region', JSON.stringify(newRegion))
   fetchWeather()
 })
 
 const today = new Date()
 const currentMonth = ref(new Date(today.getFullYear(), today.getMonth(), 1))
-const selectedDate = ref(new Date(today.getFullYear(), today.getMonth(), today.getDate()))
+
+const selectedDate = computed({
+  get: () => new Date(selectedDateStr.value),
+  set: (date) => { selectedDateStr.value = formatDate(date) }
+})
 
 const currentMonthLabel = computed(() =>
   currentMonth.value.toLocaleDateString('ko-KR', {
@@ -253,14 +313,18 @@ const calendarDays = computed(() => {
   return Array.from({ length: 42 }, (_, index) => {
     const date = new Date(startDate)
     date.setDate(startDate.getDate() + index)
+    
+    const dateStr = formatDate(date)
+    const hasTodos = todosByDate.value[dateStr] && todosByDate.value[dateStr].length > 0
 
     return {
-      key: `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`,
+      key: dateStr,
       label: date.getDate(),
       date,
+      hasTodos,
       isCurrentMonth: date.getMonth() === month,
       isToday: isSameDate(date, today),
-      isSelected: isSameDate(date, selectedDate.value),
+      isSelected: dateStr === selectedDateStr.value,
     }
   })
 })
@@ -310,7 +374,10 @@ onMounted(() => {
     </div>
 
     <!-- 1. 메인 (초단기) 날씨 영역 -->
-    <section class="weather-card" :class="timeOfDayClass">
+    <section class="weather-card" :class="[timeOfDayClass, weatherEffectClass]">
+      <!-- JS Particle Animation Container -->
+      <div ref="particleContainer" class="particle-container" v-show="weatherEffectClass === 'effect-rain' || weatherEffectClass === 'effect-snow'"></div>
+
       <div class="weather-main">
         <div>
           <p class="city">{{ selectedRegion.name }}</p>
@@ -376,7 +443,8 @@ onMounted(() => {
           }"
           @click="selectDate(day.date)"
         >
-          {{ day.label }}
+          <span>{{ day.label }}</span>
+          <span v-if="day.hasTodos" class="todo-dot"></span>
         </button>
       </div>
     </section>
@@ -453,6 +521,8 @@ onMounted(() => {
   padding: 22px;
   border-radius: 22px;
   transition: all 0.5s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 /* 밤 테마 (어두움) */
@@ -478,6 +548,67 @@ onMounted(() => {
 .weather-card.theme-day .weather-summary,
 .weather-card.theme-day .fetched-at {
   color: rgba(15, 23, 42, 0.75);
+}
+
+/* z-index to bring text above animations */
+.weather-main, .weather-summary, .fetched-at {
+  position: relative;
+  z-index: 2;
+}
+
+/* 파티클 효과 컨테이너 */
+.particle-container {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+}
+
+:deep(.raindrop) {
+  position: absolute;
+  top: -20px;
+  width: 2px;
+  height: 25px;
+  background: rgba(255, 255, 255, 0.7);
+  transform: rotate(15deg);
+  animation: fall-rain linear forwards;
+}
+
+:deep(.snowdrop) {
+  position: absolute;
+  top: -20px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.6);
+  animation: fall-snow linear forwards;
+}
+
+@keyframes fall-rain {
+  from { transform: rotate(15deg) translateY(-20px); }
+  to { transform: rotate(15deg) translateY(400px); }
+}
+
+@keyframes fall-snow {
+  from { transform: translateY(-20px) rotate(0deg); }
+  to { transform: translateY(400px) rotate(360deg); }
+}
+
+/* 구름 낀 효과 애니메이션 */
+.effect-cloud::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 60%);
+  animation: pulse-cloud 4s ease-in-out infinite alternate;
+  z-index: 1;
+}
+
+@keyframes pulse-cloud {
+  0% { transform: scale(1) translateX(0); opacity: 0.5; }
+  100% { transform: scale(1.1) translateX(-10px); opacity: 0.8; }
 }
 
 .city {
@@ -596,7 +727,7 @@ onMounted(() => {
   font-size: 0.7rem;
 }
 
-/* 달력 스타일 (유지) */
+/* 달력 스타일 */
 .calendar-section {
   margin-top: auto;
   padding: 18px;
@@ -691,6 +822,7 @@ onMounted(() => {
 .calendar-day {
   aspect-ratio: 1;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   min-width: 0;
@@ -718,6 +850,27 @@ onMounted(() => {
 .calendar-day.selected {
   color: #eff6ff;
   background: linear-gradient(135deg, #0284c7, #2563eb);
+}
+
+/* 달력 할 일 점 표시기 */
+.todo-dot {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #3b82f6; /* 기본 파란색 점 */
+  margin-top: 2px;
+}
+
+/* 선택된 날짜나 오늘인 경우 점 색상을 대비감 있게 변경 */
+.calendar-day.selected .todo-dot {
+  background-color: #ffffff;
+}
+.calendar-day.today.selected .todo-dot {
+  background-color: #ffffff;
+}
+.calendar-day.today:not(.selected) .todo-dot {
+  background-color: #0284c7;
 }
 
 @media (max-width: 640px) {

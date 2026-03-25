@@ -1,42 +1,38 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
-
-const STORAGE_KEY = 'studyjs-todos'
+import { computed, ref } from 'vue'
+import { selectedDateStr, todosByDate } from '../store.js'
 
 const todoInput = ref('')
-const todos = ref(loadTodos())
-const dragSrcIndex = ref(null)
-const dragOverIndex = ref(null)
-const sortedTodos = computed(() => [ //다한건 아래로 정렬
-  ...todos.value.filter(t => !t.done),
-  ...todos.value.filter(t => t.done),
-])
 
-function loadTodos() {
-  const saved = localStorage.getItem(STORAGE_KEY)
-  if (!saved) return []
-  try {
-    return JSON.parse(saved)
-  } catch (error) {
-    console.error('저장된 할 일 목록을 불러오지 못했습니다.', error)
-    return []
+// "항상 미완료 보여주기": 모든 날짜의 미완료 항목을 상단에 모으고, 
+// 완료된 항목은 현재 선택된 날짜의 항목만 하단에 표시합니다.
+const sortedTodos = computed(() => {
+  const allIncomplete = []
+  const sortedDates = Object.keys(todosByDate.value).sort()
+  for (const date of sortedDates) {
+    todosByDate.value[date].forEach(t => {
+      if (!t.done) {
+        allIncomplete.push({ ...t, _dateKey: date })
+      }
+    })
   }
-}
 
-watch(
-  todos,
-  (newValue) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newValue))
-  },
-  { deep: true },
-)
+  const currentComplete = (todosByDate.value[selectedDateStr.value] || [])
+    .filter(t => t.done)
+    .map(t => ({ ...t, _dateKey: selectedDateStr.value }))
 
-const remainingCount = computed(() => todos.value.filter((todo) => !todo.done).length)
+  return [...allIncomplete, ...currentComplete]
+})
+
+const remainingCount = computed(() => sortedTodos.value.filter(t => !t.done).length)
 
 function addTodo() {
   const trimmed = todoInput.value.trim()
   if (!trimmed) return
-  todos.value.unshift({
+  if (!todosByDate.value[selectedDateStr.value]) {
+    todosByDate.value[selectedDateStr.value] = []
+  }
+  todosByDate.value[selectedDateStr.value].unshift({
     id: Date.now(),
     text: trimmed,
     done: false,
@@ -44,40 +40,77 @@ function addTodo() {
   todoInput.value = ''
 }
 
-function toggleTodo(id) {
-  const todo = todos.value.find((item) => item.id === id)
-  if (todo) todo.done = !todo.done
+function toggleTodo(todo) {
+  const list = todosByDate.value[todo._dateKey]
+  const target = list.find((item) => item.id === todo.id)
+  if (target) {
+    target.done = !target.done
+    // 미완료 -> 완료: 현재 선택된 날짜로 이동
+    if (target.done && todo._dateKey !== selectedDateStr.value) {
+      removeTodo(todo)
+      if (!todosByDate.value[selectedDateStr.value]) {
+        todosByDate.value[selectedDateStr.value] = []
+      }
+      todosByDate.value[selectedDateStr.value].unshift(target)
+    }
+  }
 }
 
-function removeTodo(id) {
-  todos.value = todos.value.filter((todo) => todo.id !== id)
+function removeTodo(todo) {
+  const list = todosByDate.value[todo._dateKey]
+  todosByDate.value[todo._dateKey] = list.filter((t) => t.id !== todo.id)
 }
 
 function clearCompleted() {
-  todos.value = todos.value.filter((todo) => !todo.done)
+  const list = todosByDate.value[selectedDateStr.value]
+  if (list) {
+    todosByDate.value[selectedDateStr.value] = list.filter((t) => !t.done)
+  }
 }
 
 // ── 순서 이동 (버튼) ──
 function moveUp(index) {
   if (index === 0) return
-  const arr = [...todos.value]
-  const aId = sortedTodos.value[index].id
-  const bId = sortedTodos.value[index - 1].id
-  const aIdx = arr.findIndex(t => t.id === aId)
-  const bIdx = arr.findIndex(t => t.id === bId)
-  ;[arr[aIdx], arr[bIdx]] = [arr[bIdx], arr[aIdx]]
-  todos.value = arr
+  swapTodos(index, index - 1)
 }
 
 function moveDown(index) {
   if (index === sortedTodos.value.length - 1) return
-  const arr = [...todos.value]
-  const aId = sortedTodos.value[index].id
-  const bId = sortedTodos.value[index + 1].id
-  const aIdx = arr.findIndex(t => t.id === aId)
-  const bIdx = arr.findIndex(t => t.id === bId)
-  ;[arr[aIdx], arr[bIdx]] = [arr[bIdx], arr[aIdx]]
-  todos.value = arr
+  swapTodos(index, index + 1)
+}
+
+function swapTodos(idxA, idxB) {
+  const tA = sortedTodos.value[idxA]
+  const tB = sortedTodos.value[idxB]
+  
+  const listA = todosByDate.value[tA._dateKey]
+  const listB = todosByDate.value[tB._dateKey]
+  
+  const realIdxA = listA.findIndex(t => t.id === tA.id)
+  const realIdxB = listB.findIndex(t => t.id === tB.id)
+
+  if (tA._dateKey === tB._dateKey) {
+    const temp = listA[realIdxA]
+    listA[realIdxA] = listB[realIdxB]
+    listB[realIdxB] = temp
+  } else {
+    const tempA = listA.splice(realIdxA, 1)[0]
+    const tempB = listB.splice(realIdxB, 1)[0]
+    listA.splice(realIdxA, 0, tempB)
+    listB.splice(realIdxB, 0, tempA)
+  }
+}
+
+// ── 드래그 앤 드롭 ──
+const dragSrcIndex = ref(null)
+const dragOverIndex = ref(null)
+
+function onDragStart(index) {
+  dragSrcIndex.value = index
+}
+
+function onDragOver(index) {
+  dragOverIndex.value = index
 }
 
 function onDrop(index) {
@@ -86,25 +119,21 @@ function onDrop(index) {
     dragOverIndex.value = null
     return
   }
-  const arr = [...todos.value]
-  const srcId = sortedTodos.value[dragSrcIndex.value].id
-  const tgtId = sortedTodos.value[index].id
-  const srcIdx = arr.findIndex(t => t.id === srcId)
-  const tgtIdx = arr.findIndex(t => t.id === tgtId)
-  const [moved] = arr.splice(srcIdx, 1)
-  arr.splice(tgtIdx, 0, moved)
-  todos.value = arr
+  
+  const tSrc = sortedTodos.value[dragSrcIndex.value]
+  const tTgt = sortedTodos.value[index]
+  
+  const listSrc = todosByDate.value[tSrc._dateKey]
+  const listTgt = todosByDate.value[tTgt._dateKey]
+  
+  const realIdxSrc = listSrc.findIndex(t => t.id === tSrc.id)
+  const realIdxTgt = listTgt.findIndex(t => t.id === tTgt.id)
+  
+  const [moved] = listSrc.splice(realIdxSrc, 1)
+  listTgt.splice(realIdxTgt, 0, moved)
+  
   dragSrcIndex.value = null
   dragOverIndex.value = null
-}
-
-// ── 드래그 앤 드롭 ──
-function onDragStart(index) {
-  dragSrcIndex.value = index
-}
-
-function onDragOver(index) {
-  dragOverIndex.value = index
 }
 
 function onDragEnd() {
@@ -118,6 +147,7 @@ function onDragEnd() {
     <div class="panel-header">
       <div>
         <p class="gradient-text">Todo List</p>
+        <p class="date-subtitle">{{ selectedDateStr }}</p>
       </div>
       <span class="badge">남은 일 {{ remainingCount }}개</span>
     </div>
@@ -142,43 +172,42 @@ function onDragEnd() {
         @drop="onDrop(index)"
         @dragend="onDragEnd"
       >
-        <!-- 드래그 핸들 + 위아래 버튼 -->
-        <!-- done이 아닐 때만 순서 컨트롤 표시 -->
-    <div class="order-controls" v-if="!todo.done">
-      <span class="drag-handle" title="드래그로 이동">⠿</span>
-      <div class="arrow-buttons">
-        <button
-          class="arrow-button"
-          type="button"
-          :disabled="index === 0"
-          @click="moveUp(index)"
-          title="위로"
-        >▲</button>
-        <button
-          class="arrow-button"
-          type="button"
-          :disabled="index === sortedTodos.length - 1"
-          @click="moveDown(index)"
-          title="아래로"
-        >▼</button>
-      </div>
-    </div>
-
-        <!-- done이면 빈 div로 레이아웃 유지 -->
+        <div class="order-controls" v-if="!todo.done">
+          <span class="drag-handle" title="드래그로 이동">⠿</span>
+          <div class="arrow-buttons">
+            <button
+              class="arrow-button"
+              type="button"
+              :disabled="index === 0"
+              @click="moveUp(index)"
+              title="위로"
+            >▲</button>
+            <button
+              class="arrow-button"
+              type="button"
+              :disabled="index === sortedTodos.length - 1"
+              @click="moveDown(index)"
+              title="아래로"
+            >▼</button>
+          </div>
+        </div>
         <div v-else></div>
 
         <button
           class="toggle-button"
           type="button"
           :style="{ color: todo.done ? '#16a34a' : '#1d4ed8' }"
-          @click="toggleTodo(todo.id)"
+          @click="toggleTodo(todo)"
         >
           {{ todo.done ? '이걸 해냄' : '해야 함' }}
         </button>
 
-        <span>{{ todo.text }}</span>
+        <span class="todo-text">
+          <span v-if="!todo.done && todo._dateKey !== selectedDateStr" class="todo-date-badge">{{ todo._dateKey }}</span>
+          {{ todo.text }}
+        </span>
 
-        <button class="delete-button" type="button" @click="removeTodo(todo.id)">
+        <button class="delete-button" type="button" @click="removeTodo(todo)">
           삭제
         </button>
       </li>
@@ -225,6 +254,13 @@ function onDragEnd() {
   color: #1d4ed8;
   font-size: 0.9rem;
   font-weight: 700;
+}
+
+.date-subtitle {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 4px;
+  font-weight: 600;
 }
 
 .todo-form {
@@ -297,7 +333,22 @@ button {
   text-decoration: line-through;
 }
 
-/* 순서 조작 컨트롤 */
+.todo-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  word-break: break-all;
+}
+
+.todo-date-badge {
+  font-size: 0.65rem;
+  background: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 6px;
+  color: #475569;
+  text-decoration: none !important;
+}
+
 .order-controls {
   display: flex;
   align-items: center;
