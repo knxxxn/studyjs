@@ -37,3 +37,33 @@ watch(
   },
   { deep: true },
 )
+
+const MEMO_STORAGE_KEY = 'studyjs-memos'
+
+function loadMemos() {
+  const saved = localStorage.getItem(MEMO_STORAGE_KEY)
+  if (!saved) return {}
+  try {
+    return JSON.parse(saved)
+  } catch (error) {
+    console.error('Failed to load memos from local storage.', error)
+    return {}
+  }
+}
+
+export const memosByDate = ref(loadMemos())
+
+watch(
+  memosByDate,
+  (newValue) => {
+    // 빈 문자열인 경우 스토리지에 저장할 때 키를 제거하여 깔끔하게 유지합니다.
+    const dataToSave = {}
+    for (const date in newValue) {
+      if (newValue[date] && newValue[date].trim() !== '') {
+        dataToSave[date] = newValue[date]
+      }
+    }
+    localStorage.setItem(MEMO_STORAGE_KEY, JSON.stringify(dataToSave))
+  },
+  { deep: true },
+)

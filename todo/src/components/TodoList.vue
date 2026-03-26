@@ -1,8 +1,17 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { selectedDateStr, todosByDate } from '../store.js'
+import { selectedDateStr, todosByDate, memosByDate } from '../store.js'
 
 const todoInput = ref('')
+
+const dateMemo = computed({
+  get() {
+    return memosByDate.value[selectedDateStr.value] || ''
+  },
+  set(val) {
+    memosByDate.value[selectedDateStr.value] = val
+  }
+})
 
 // "항상 미완료 보여주기": 모든 날짜의 미완료 항목을 상단에 모으고, 
 // 완료된 항목은 현재 선택된 날짜의 항목만 하단에 표시합니다.
@@ -216,6 +225,15 @@ function onDragEnd() {
     <button class="clear-button" type="button" @click="clearCompleted">
       완료한 항목 지우기
     </button>
+
+    <div class="memo-section">
+      <h3 class="memo-title">오늘의 메모</h3>
+      <textarea
+        v-model="dateMemo"
+        class="memo-input"
+        placeholder="자잘자잘 주절주절"
+      ></textarea>
+    </div>
   </article>
 </template>
 
@@ -411,6 +429,41 @@ button {
 
 .clear-button {
   width: 100%;
+}
+
+.memo-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px dashed #cbd5e1;
+}
+
+.memo-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 12px;
+  margin-top: 0;
+}
+
+.memo-input {
+  width: 100%;
+  height: 120px;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 0.95rem;
+  color: #0f172a;
+  background: #f8fafc;
+  resize: vertical;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.memo-input:focus {
+  outline: 3px solid rgba(59, 130, 246, 0.18);
+  border-color: #60a5fa;
+  background: #fff;
 }
 
 @media (max-width: 640px) {
