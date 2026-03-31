@@ -334,6 +334,7 @@ button {
   padding: 14px;
   border-radius: 18px;
   background: #f8fafc;
+  color: #0f172a;
   transition: background 0.15s, opacity 0.15s, transform 0.15s;
 }
 
