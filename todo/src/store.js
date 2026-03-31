@@ -33,7 +33,13 @@ export const todosByDate = ref(loadTodos())
 watch(
   todosByDate,
   (newValue) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newValue))
+    const dataToSave = {}
+    for (const date in newValue) {
+      if (Array.isArray(newValue[date]) && newValue[date].length > 0) {
+        dataToSave[date] = newValue[date]
+      }
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave))
   },
   { deep: true },
 )
