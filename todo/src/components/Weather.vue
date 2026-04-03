@@ -1,10 +1,36 @@
 <script setup>
 import { computed, ref, onMounted, watch } from 'vue'
-import { selectedDateStr, todosByDate, formatDate } from '../store.js'
+import { selectedDateStr, todosByDate, formatDate, globalDDay, getDDayText } from '../store.js'
 
-const serviceKeyGlobal = import.meta.env.VITE_KMA_API_KEY // 로컬 외에는 사용되지 않습니다.
+const showDDayModal = ref(false)
+const ddayInput = ref({ title: '', date: selectedDateStr.value })
 
-// 조회 가능한 관심 지역 목록
+watch(showDDayModal, (val) => {
+  if (val) {
+    if (globalDDay.value) {
+      ddayInput.value = { ...globalDDay.value }
+    } else {
+      ddayInput.value = { title: '', date: selectedDateStr.value }
+    }
+  }
+})
+
+function saveDDay() {
+  if (!ddayInput.value.title || !ddayInput.value.date) {
+    alert('이름과 날짜를 입력해주세요.')
+    return
+  }
+  globalDDay.value = { ...ddayInput.value }
+  showDDayModal.value = false
+}
+
+function clearDDay() {
+  globalDDay.value = null
+  showDDayModal.value = false
+}
+
+const serviceKeyGlobal = import.meta.env.VITE_KMA_API_KEY
+
 const regions = [
   { name: '서울', nx: 60, ny: 127 },
   { name: '부산', nx: 98, ny: 76 },
@@ -417,8 +443,17 @@ onMounted(() => {
     <!-- 3. 기존 달력 영역 -->
     <section class="calendar-section">
       <div class="calendar-header">
-        <div>
-          <p class="calendar-title">Calendar</p>
+        <div class="calendar-title-group">
+          <p class="calendar-title">
+            Calendar
+            <button class="dday-badge" type="button" @click="showDDayModal = true" title="디데이 설정">
+              <template v-if="globalDDay">
+                <span class="dday-name">{{ globalDDay.title }}</span>
+                <span class="dday-text">{{ getDDayText(globalDDay.date) }}</span>
+              </template>
+              <span v-else class="dday-empty">+ 디데이 추가</span>
+            </button>
+          </p>
           <p class="calendar-subtitle">{{ currentMonthLabel }}</p>
         </div>
         <div class="calendar-actions">
@@ -460,6 +495,30 @@ onMounted(() => {
         </button>
       </div>
     </section>
+
+    <!-- D-Day Modal -->
+    <div v-if="showDDayModal" class="modal-overlay" @click.self="showDDayModal = false">
+      <div class="modal-content">
+        <h3>디데이 설정 🎯</h3>
+        <div class="modal-form">
+          <label>
+            <span>목표 이름</span>
+            <input v-model="ddayInput.title" type="text" placeholder="예: 시험, 시작일" />
+          </label>
+          <label>
+            <span>목표 날짜</span>
+            <input v-model="ddayInput.date" type="date" />
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-clear" @click="clearDDay" v-if="globalDDay">디데이 삭제</button>
+          <div class="modal-right-actions">
+            <button type="button" class="btn-cancel" @click="showDDayModal = false">취소</button>
+            <button type="button" class="btn-save" @click="saveDDay">저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </article>
 </template>
 
@@ -905,4 +964,134 @@ onMounted(() => {
     flex: 1;
   }
 }
+
+/* 글로벌 디데이 및 모달 스타일 */
+.calendar-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendar-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dday-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.4);
+  transition: all 0.2s ease;
+}
+
+.dday-badge:hover {
+  background: #dbeafe;
+}
+
+.dday-name {
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+.dday-empty {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  width: 90%;
+  max-width: 320px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+}
+
+.modal-content h3 {
+  margin: 0 0 20px 0;
+  color: #0f172a;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.modal-form input {
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  font: inherit;
+  color: #0f172a;
+}
+
+.modal-form input:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.3);
+  border-color: #60a5fa;
+  background: #fff;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.modal-actions:has(.btn-clear) {
+  justify-content: space-between;
+}
+
+.modal-right-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-clear, .btn-cancel, .btn-save {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-clear { background: #fee2e2; color: #dc2626; }
+.btn-clear:hover { background: #fca5a5; }
+.btn-cancel { background: #e2e8f0; color: #475569; }
+.btn-cancel:hover { background: #cbd5e1; }
+.btn-save { background: #3b82f6; color: #fff; }
+.btn-save:hover { background: #2563eb; }
 </style>

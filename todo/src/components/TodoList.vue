@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { selectedDateStr, todosByDate, memosByDate } from '../store.js'
+import { selectedDateStr, todosByDate, memosByDate, getDDayText } from '../store.js'
 
 const todoInput = ref('')
 
@@ -13,15 +13,17 @@ const dateMemo = computed({
   }
 })
 
-// "항상 미완료 보여주기": 모든 날짜의 미완료 항목을 상단에 모으고, 
-// 완료된 항목은 현재 선택된 날짜의 항목만 하단에 표시합니다.
+// "과거/현재 미완료 보여주기": 선택된 날짜 이전(과거) 및 당일의 미완료 항목을 상단에 모으고, 
+// 완료된 항목은 현재 선택된 날짜의 항목만 하단에 표시 (미래라도 isDDay가 켜진 항목은 표시)
 const sortedTodos = computed(() => {
   const allIncomplete = []
   const sortedDates = Object.keys(todosByDate.value).sort()
   for (const date of sortedDates) {
     todosByDate.value[date].forEach(t => {
       if (!t.done) {
-        allIncomplete.push({ ...t, _dateKey: date })
+        if (date <= selectedDateStr.value || t.isDDay) {
+          allIncomplete.push({ ...t, _dateKey: date })
+        }
       }
     })
   }
@@ -62,6 +64,14 @@ function toggleTodo(todo) {
       }
       todosByDate.value[selectedDateStr.value].unshift(target)
     }
+  }
+}
+
+function toggleDDay(todo) {
+  const list = todosByDate.value[todo._dateKey]
+  const target = list.find((item) => item.id === todo.id)
+  if (target) {
+    target.isDDay = !target.isDDay
   }
 }
 
@@ -213,12 +223,26 @@ function onDragEnd() {
 
         <span class="todo-text">
           <span v-if="!todo.done && todo._dateKey !== selectedDateStr" class="todo-date-badge">{{ todo._dateKey }}</span>
+          <span v-if="todo.isDDay && !todo.done" class="todo-dday-badge" :title="todo._dateKey + ' 마감'">
+            {{ getDDayText(todo._dateKey) }}
+          </span>
           {{ todo.text }}
         </span>
 
-        <button class="delete-button" type="button" @click="removeTodo(todo)">
-          삭제
-        </button>
+        <div class="action-buttons">
+          <button
+            class="flag-button"
+            type="button"
+            :class="{ active: todo.isDDay }"
+            @click="toggleDDay(todo)"
+            title="디데이 뱃지 토글"
+          >
+            🚩
+          </button>
+          <button class="delete-button" type="button" @click="removeTodo(todo)">
+            삭제
+          </button>
+        </div>
       </li>
     </ul>
 
@@ -366,6 +390,17 @@ button {
   border-radius: 6px;
   color: #475569;
   text-decoration: none !important;
+  white-space: nowrap;
+}
+
+.todo-dday-badge {
+  font-size: 0.75rem;
+  background: #e0f2fe;
+  color: #0284c7;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .order-controls {
@@ -419,6 +454,31 @@ button {
   background: #dbeafe;
   font-size: 0.88rem;
   font-weight: 700;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.flag-button {
+  padding: 8px;
+  background: transparent;
+  opacity: 0.4;
+  font-size: 1rem;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.flag-button:hover {
+  background: #f1f5f9;
+  opacity: 0.8;
+}
+
+.flag-button.active {
+  opacity: 1;
+  background: #fee2e2;
+  box-shadow: inset 0 0 0 1px #fca5a5;
 }
 
 .delete-button {
