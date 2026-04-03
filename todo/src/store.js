@@ -10,22 +10,10 @@ export function formatDate(date) {
 const today = new Date()
 export const selectedDateStr = ref(formatDate(today))
 
+// ── 스토리지 키 상수 (cleanOldData보다 먼저 선언) ──
 const STORAGE_KEY = 'studyjs-todos'
-
-function loadTodos() {
-  const saved = localStorage.getItem(STORAGE_KEY)
-  if (!saved) return {}
-  try {
-    const parsed = JSON.parse(saved)
-    if (Array.isArray(parsed)) {
-      return { [formatDate(today)]: parsed }
-    }
-    return parsed
-  } catch (error) {
-    console.error('Failed to load todos from local storage.', error)
-    return {}
-  }
-}
+const MEMO_STORAGE_KEY = 'studyjs-memos'
+const GLOBAL_DDAY_KEY = 'studyjs-global-dday'
 
 // ── 오래된 데이터 자동 정리 ──
 // - 투두/메모: 180일 이상 지난 날짜 키 삭제
@@ -74,6 +62,22 @@ function cleanOldData() {
 
 cleanOldData()
 
+// ── 투두 ──
+function loadTodos() {
+  const saved = localStorage.getItem(STORAGE_KEY)
+  if (!saved) return {}
+  try {
+    const parsed = JSON.parse(saved)
+    if (Array.isArray(parsed)) {
+      return { [formatDate(today)]: parsed }
+    }
+    return parsed
+  } catch (error) {
+    console.error('Failed to load todos from local storage.', error)
+    return {}
+  }
+}
+
 export const todosByDate = ref(loadTodos())
 
 watch(
@@ -90,8 +94,7 @@ watch(
   { deep: true },
 )
 
-const MEMO_STORAGE_KEY = 'studyjs-memos'
-
+// ── 메모 ──
 function loadMemos() {
   const saved = localStorage.getItem(MEMO_STORAGE_KEY)
   if (!saved) return {}
@@ -119,8 +122,7 @@ watch(
   { deep: true },
 )
 
-const GLOBAL_DDAY_KEY = 'studyjs-global-dday'
-
+// ── 글로벌 디데이 ──
 function loadGlobalDDay() {
   const saved = localStorage.getItem(GLOBAL_DDAY_KEY)
   if (!saved) return null

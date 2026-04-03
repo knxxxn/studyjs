@@ -75,6 +75,37 @@ function toggleDDay(todo) {
   }
 }
 
+// ── 인라인 편집 ──
+const editingKey = ref(null)  // 'dateKey_id' 형태로 유일 식별
+const editText = ref('')
+
+function todoKey(todo) {
+  return `${todo._dateKey}_${todo.id}`
+}
+
+function startEdit(todo) {
+  if (todo.done) return
+  editingKey.value = todoKey(todo)
+  editText.value = todo.text
+}
+
+function commitEdit(todo) {
+  const trimmed = editText.value.trim()
+  if (trimmed) {
+    // sortedTodos는 복사본이라 원본 store를 직접 수정
+    const list = todosByDate.value[todo._dateKey]
+    const target = list?.find((item) => item.id === todo.id)
+    if (target) target.text = trimmed
+  }
+  editingKey.value = null
+  editText.value = ''
+}
+
+function cancelEdit() {
+  editingKey.value = null
+  editText.value = ''
+}
+
 function removeTodo(todo) {
   const list = todosByDate.value[todo._dateKey]
   todosByDate.value[todo._dateKey] = list.filter((t) => t.id !== todo.id)
@@ -221,13 +252,25 @@ function onDragEnd() {
           {{ todo.done ? '이걸 해냄' : '해야 함' }}
         </button>
 
-        <span class="todo-text">
+        <!-- 편집 중: input 표시 / 일반: 텍스트 표시 -->
+        <span class="todo-text" v-if="editingKey !== todoKey(todo)" @dblclick="startEdit(todo)" :title="todo.done ? '' : '더블 클릭으로 편집'">
           <span v-if="!todo.done && todo._dateKey !== selectedDateStr" class="todo-date-badge">{{ todo._dateKey }}</span>
           <span v-if="todo.isDDay && !todo.done" class="todo-dday-badge" :title="todo._dateKey + ' 마감'">
             {{ getDDayText(todo._dateKey) }}
           </span>
           {{ todo.text }}
         </span>
+
+        <input
+          v-else
+          class="todo-edit-input"
+          v-model="editText"
+          @blur="commitEdit(todo)"
+          @keyup.enter="commitEdit(todo)"
+          @keyup.esc="cancelEdit"
+          :ref="el => { if (el) el.focus() }"
+          @click.stop
+        />
 
         <div class="action-buttons">
           <button
@@ -375,6 +418,23 @@ button {
 
 .todo-list li.drag-src {
   opacity: 0.4;
+}
+
+.todo-text {
+  cursor: text;
+}
+
+.todo-edit-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1.5px solid #60a5fa;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--color-heading);
+  background: var(--input-bg);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18);
 }
 
 .todo-list li.done span {

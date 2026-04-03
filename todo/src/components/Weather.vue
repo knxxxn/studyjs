@@ -74,6 +74,7 @@ const weatherData = ref({
 })
 
 const forecastList = ref([])
+const weatherError = ref(false)
 
 const timeOfDayClass = computed(() => {
   const hour = new Date().getHours()
@@ -168,6 +169,7 @@ function parseCondition(pty, sky) {
 async function fetchWeather() {
   weatherData.value.condition = '로딩중'
   weatherData.value.summary = '날씨를 갱신하고 있습니다...'
+  weatherError.value = false
   await Promise.all([fetchCurrentWeather(), fetchShortTermForecast()]);
 }
 
@@ -232,6 +234,13 @@ async function fetchCurrentWeather() {
     }
   } catch (error) {
     console.error('Fetch current weather failed:', error)
+    weatherError.value = true
+    weatherData.value = {
+      temperature: '--',
+      condition: '오류',
+      summary: '날씨 정보를 불러오지 못했습니다.',
+      fetchedAt: '--',
+    }
   }
 }
 
@@ -316,6 +325,7 @@ async function fetchShortTermForecast() {
     }
   } catch (error) {
     console.error('Fetch short term forecast failed:', error)
+    weatherError.value = true
   }
 }
 
@@ -422,15 +432,25 @@ onMounted(() => {
       <!-- JS Particle Animation Container -->
       <div ref="particleContainer" class="particle-container" v-show="weatherEffectClass === 'effect-rain' || weatherEffectClass === 'effect-snow'"></div>
 
-      <div class="weather-main">
+      <!-- 에러 상태 안내 -->
+      <div v-if="weatherError" class="weather-error">
+        <span class="weather-error-icon">⚠️</span>
+        <div>
+          <p class="weather-error-title">날씨 정보를 불러오지 못했습니다</p>
+          <p class="weather-error-sub">잠시 후 다시 시도해 주세요</p>
+        </div>
+        <button type="button" class="weather-retry-btn" @click="fetchWeather">다시 시도</button>
+      </div>
+
+      <div class="weather-main" v-else>
         <div>
           <p class="city">{{ selectedRegion.name }}</p>
           <p class="condition">{{ weatherData.condition }}</p>
         </div>
         <p class="temperature">{{ weatherData.temperature }}<span v-if="weatherData.temperature !== '--'">°C</span></p>
       </div>
-      <p class="weather-summary">{{ weatherData.summary }}</p>
-      <p class="fetched-at">업데이트: {{ weatherData.fetchedAt }}</p>
+      <p class="weather-summary" v-if="!weatherError">{{ weatherData.summary }}</p>
+      <p class="fetched-at" v-if="!weatherError">업데이트: {{ weatherData.fetchedAt }}</p>
     </section>
 
     <!-- 2. 단기예보 하단 스크롤 리스트 -->
@@ -599,6 +619,49 @@ onMounted(() => {
 
 .region-button:hover {
   background: var(--item-hover);
+}
+
+/* 날씨 에러 UI */
+.weather-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.weather-error-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.weather-error-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.weather-error-sub {
+  font-size: 0.82rem;
+  opacity: 0.75;
+  margin-top: 2px;
+}
+
+.weather-retry-btn {
+  margin-left: auto;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.weather-retry-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .region-modal-content {
