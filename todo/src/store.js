@@ -27,6 +27,53 @@ function loadTodos() {
   }
 }
 
+// ── 오래된 데이터 자동 정리 ──
+// - 투두/메모: 180일 이상 지난 날짜 키 삭제
+// - 글로벌 디데이: 목표일이 180일 이상 지난 경우(D+180~) 자동 삭제, 미래(D-) 또는 최근은 유지
+const CLEANUP_THRESHOLD_DAYS = 180
+
+function cleanOldData() {
+  const cutoff = new Date()
+  cutoff.setDate(cutoff.getDate() - CLEANUP_THRESHOLD_DAYS)
+  const cutoffStr = formatDate(cutoff)
+
+  // 투두 & 메모 정리
+  for (const key of [STORAGE_KEY, MEMO_STORAGE_KEY]) {
+    const saved = localStorage.getItem(key)
+    if (!saved) continue
+    try {
+      const parsed = JSON.parse(saved)
+      if (typeof parsed !== 'object' || Array.isArray(parsed)) continue
+
+      let changed = false
+      for (const date in parsed) {
+        if (date < cutoffStr) {
+          delete parsed[date]
+          changed = true
+        }
+      }
+      if (changed) {
+        localStorage.setItem(key, JSON.stringify(parsed))
+      }
+    } catch (e) {
+      // 파싱 실패 시 그냥 넘어감
+    }
+  }
+
+  // 글로벌 디데이 정리: 목표일이 180일 이상 지난 경우만 삭제 (미래 목표는 유지)
+  const savedDDay = localStorage.getItem(GLOBAL_DDAY_KEY)
+  if (savedDDay) {
+    try {
+      const parsed = JSON.parse(savedDDay)
+      if (parsed?.date && parsed.date < cutoffStr) {
+        localStorage.removeItem(GLOBAL_DDAY_KEY)
+      }
+    } catch (e) {}
+  }
+}
+
+cleanOldData()
+
 export const todosByDate = ref(loadTodos())
 
 watch(
