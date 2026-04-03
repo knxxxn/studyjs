@@ -3,6 +3,7 @@ import { computed, ref, onMounted, watch } from 'vue'
 import { selectedDateStr, todosByDate, formatDate, globalDDay, getDDayText } from '../store.js'
 
 const showDDayModal = ref(false)
+const showRegionModal = ref(false)
 const ddayInput = ref({ title: '', date: selectedDateStr.value })
 
 watch(showDDayModal, (val) => {
@@ -59,6 +60,11 @@ if (savedRegion) {
 }
 
 const selectedRegion = ref(initialRegion)
+
+function pickRegion(r) {
+  selectedRegion.value = r
+  showRegionModal.value = false
+}
 
 const weatherData = ref({
   temperature: '--',
@@ -404,9 +410,9 @@ onMounted(() => {
         <h2 class="gradient-text">Weather</h2>
       </div>
       <div class="header-right">
-        <select v-model="selectedRegion" class="region-select">
-          <option v-for="r in regions" :key="r.name" :value="r">{{ r.name }}</option>
-        </select>
+        <button type="button" class="region-button" @click="showRegionModal = true">
+          📍 {{ selectedRegion.name }}
+        </button>
         <div class="weather-icon">{{ weatherEmoji }}</div>
       </div>
     </div>
@@ -519,6 +525,27 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <!-- Region Modal -->
+    <div v-if="showRegionModal" class="modal-overlay" @click.self="showRegionModal = false">
+      <div class="modal-content region-modal-content">
+        <h3>지역 선택 🗺️</h3>
+        <div class="region-grid">
+          <button 
+            v-for="r in regions" 
+            :key="r.name" 
+            type="button"
+            class="region-item" 
+            :class="{ active: r.name === selectedRegion.name }"
+            @click="pickRegion(r)"
+          >
+            {{ r.name }}
+          </button>
+        </div>
+        <div class="modal-actions" style="justify-content: flex-end;">
+          <button type="button" class="btn-cancel" @click="showRegionModal = false">닫기</button>
+        </div>
+      </div>
+    </div>
   </article>
 </template>
 
@@ -526,10 +553,10 @@ onMounted(() => {
 .panel {
   height: 100%;
   padding: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.28);
+  border: 1px solid var(--panel-border);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+  background: var(--panel-bg);
+  box-shadow: 0 20px 45px var(--shadow-color);
 }
 
 .weather-panel {
@@ -538,7 +565,7 @@ onMounted(() => {
   gap: 14px;
   background:
     radial-gradient(circle at top right, rgba(125, 211, 252, 0.28), transparent 28%),
-    rgba(255, 255, 255, 0.92);
+    var(--panel-bg);
 }
 
 .panel-header {
@@ -554,22 +581,55 @@ onMounted(() => {
   gap: 12px;
 }
 
-.region-select {
-  padding: 8px 12px;
+.region-button {
+  padding: 8px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  background: white;
-  font-size: 0.95rem;
+  border: 1px solid var(--panel-border);
+  background: var(--input-bg);
+  color: var(--color-heading);
   font-weight: 700;
-  color: #0f172a;
-  outline: none;
+  font-size: 0.95rem;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 5px var(--shadow-color);
+  transition: all 0.2s;
 }
 
-.region-select:focus {
-  border-color: #38bdf8;
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3);
+.region-button:hover {
+  background: var(--item-hover);
+}
+
+.region-modal-content {
+  max-width: 380px;
+}
+
+.region-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.region-item {
+  padding: 10px 0;
+  border-radius: 12px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--color-text);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.region-item:hover {
+  background: var(--item-hover);
+}
+
+.region-item.active {
+  background: #3b82f6;
+  color: #fff;
+  border-color: #2563eb;
 }
 
 .gradient-text {
@@ -718,14 +778,14 @@ onMounted(() => {
 .forecast-section {
   padding: 18px;
   border-radius: 22px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.8));
+  border: 1px solid var(--panel-border);
+  background: var(--item-bg);
 }
 
 .forecast-title {
   font-size: 0.95rem;
   font-weight: 800;
-  color: #334155;
+  color: var(--color-heading);
   margin-bottom: 12px;
 }
 
@@ -759,10 +819,10 @@ onMounted(() => {
   justify-content: center;
   min-width: 60px;
   padding: 12px 0;
-  background: #ffffff;
-  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: var(--input-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .forecast-item .time {
@@ -780,7 +840,7 @@ onMounted(() => {
 .forecast-item .temp {
   font-size: 1.1rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--color-text);
 }
 
 .forecast-item .pop {
@@ -803,8 +863,8 @@ onMounted(() => {
   margin-top: auto;
   padding: 18px;
   border-radius: 22px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: linear-gradient(180deg, rgba(226, 232, 240, 0.7), rgba(241, 245, 249, 0.95));
+  border: 1px solid var(--panel-border);
+  background: var(--item-bg);
 }
 
 .calendar-header {
@@ -817,7 +877,7 @@ onMounted(() => {
 .calendar-title {
   font-size: 1rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--color-heading);
 }
 
 .calendar-subtitle,
@@ -842,15 +902,15 @@ onMounted(() => {
 .calendar-nav,
 .calendar-today {
   padding: 10px 12px;
-  color: #0f172a;
-  background: #fff;
-  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.2);
+  color: var(--color-text);
+  background: var(--input-bg);
+  box-shadow: inset 0 0 0 1px var(--panel-border);
   transition: all 0.2s ease;
 }
 
 .calendar-nav:hover,
 .calendar-today:hover {
-  background: #f8fafc;
+  background: var(--item-hover);
 }
 
 .calendar-nav {
@@ -899,19 +959,19 @@ onMounted(() => {
   min-width: 0;
   padding: 0;
   border-radius: 18px;
-  color: #0f172a;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.15);
+  color: var(--color-text);
+  background: var(--input-bg);
+  box-shadow: inset 0 0 0 1px var(--panel-border);
   transition: all 0.2s ease;
 }
 
 .calendar-day:hover {
-  background: #f1f5f9;
+  background: var(--item-hover);
 }
 
 .calendar-day.muted {
   color: #94a3b8;
-  background: rgba(255, 255, 255, 0.55);
+  background: transparent;
 }
 
 .calendar-day.today {
@@ -1020,17 +1080,17 @@ onMounted(() => {
 }
 
 .modal-content {
-  background: #fff;
+  background: var(--panel-bg);
   border-radius: 20px;
   padding: 24px;
   width: 90%;
   max-width: 320px;
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 20px 40px var(--shadow-color);
 }
 
 .modal-content h3 {
   margin: 0 0 20px 0;
-  color: #0f172a;
+  color: var(--color-heading);
 }
 
 .modal-form {
@@ -1050,11 +1110,11 @@ onMounted(() => {
 
 .modal-form input {
   padding: 12px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--input-border);
   border-radius: 12px;
-  background: #f8fafc;
+  background: var(--input-bg);
   font: inherit;
-  color: #0f172a;
+  color: var(--color-text);
 }
 
 .modal-form input:focus {

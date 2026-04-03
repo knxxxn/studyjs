@@ -265,10 +265,11 @@ function onDragEnd() {
 .panel {
   height: 100%;
   padding: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.28);
+  border: 1px solid var(--panel-border);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+  background: var(--panel-bg);
+  box-shadow: 0 20px 45px var(--shadow-color);
+  color: var(--color-text);
 }
 
 .panel-header {
@@ -315,11 +316,16 @@ function onDragEnd() {
 input {
   width: 100%;
   padding: 14px 16px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--input-border);
   border-radius: 14px;
   font: inherit;
-  color: #0f172a;
-  background: #fff;
+  color: var(--color-heading);
+  background: var(--input-bg);
+  transition: all 0.2s;
+}
+
+input::placeholder {
+  color: var(--text-muted);
 }
 
 input:focus {
@@ -357,8 +363,8 @@ button {
   align-items: center;
   padding: 14px;
   border-radius: 18px;
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--item-bg);
+  color: var(--color-heading);
   transition: background 0.15s, opacity 0.15s, transform 0.15s;
 }
 
@@ -372,7 +378,7 @@ button {
 }
 
 .todo-list li.done span {
-  color: #64748b;
+  color: var(--text-muted);
   text-decoration: line-through;
 }
 
@@ -451,7 +457,8 @@ button {
 .toggle-button {
   min-width: 78px;
   padding: 10px 12px;
-  background: #dbeafe;
+  background: var(--btn-toggle-bg);
+  color: var(--btn-toggle-text);
   font-size: 0.88rem;
   font-weight: 700;
 }
@@ -477,14 +484,14 @@ button {
 
 .flag-button.active {
   opacity: 1;
-  background: #fee2e2;
-  box-shadow: inset 0 0 0 1px #fca5a5;
+  background: var(--btn-delete-bg);
+  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.3);
 }
 
 .delete-button {
   padding: 10px 12px;
-  color: #dc2626;
-  background: #fee2e2;
+  color: var(--btn-delete-text);
+  background: var(--btn-delete-bg);
   font-weight: 700;
 }
 
@@ -501,7 +508,7 @@ button {
 .memo-title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #334155;
+  color: var(--color-heading);
   margin-bottom: 12px;
   margin-top: 0;
 }
@@ -510,12 +517,12 @@ button {
   width: 100%;
   height: 120px;
   padding: 14px 16px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--input-border);
   border-radius: 14px;
   font: inherit;
   font-size: 0.95rem;
-  color: #0f172a;
-  background: #f8fafc;
+  color: var(--color-text);
+  background: var(--memo-bg);
   resize: vertical;
   transition: all 0.2s;
   box-sizing: border-box;
