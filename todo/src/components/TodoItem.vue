@@ -168,6 +168,13 @@ li.done span {
   text-decoration: line-through;
 }
 
+button {
+  border: none;
+  border-radius: 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
 .todo-text {
   cursor: text;
   display: flex;
