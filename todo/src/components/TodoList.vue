@@ -3,6 +3,8 @@ import { computed, ref } from 'vue'
 import { selectedDateStr, todosByDate, memosByDate, getDDayText } from '../store.js'
 
 const todoInput = ref('')
+const tags = ['일반', '업무', '개인', '학습']
+const selectedTag = ref('일반')
 
 const dateMemo = computed({
   get() {
@@ -47,8 +49,10 @@ function addTodo() {
     id: Date.now(),
     text: trimmed,
     done: false,
+    tag: selectedTag.value
   })
   todoInput.value = ''
+  selectedTag.value = '일반'
 }
 
 function toggleTodo(todo) {
@@ -203,11 +207,14 @@ function onDragEnd() {
     </div>
 
     <form class="todo-form" @submit.prevent="addTodo">
+      <select v-model="selectedTag" class="tag-select" title="카테고리 선택">
+        <option v-for="tag in tags" :key="tag" :value="tag">{{ tag }}</option>
+      </select>
       <input v-model="todoInput" type="text" placeholder="할 일 추가" />
       <button type="submit">추가</button>
     </form>
 
-    <ul class="todo-list">
+    <ul class="todo-list" v-if="sortedTodos.length > 0">
       <li
         v-for="(todo, index) in sortedTodos"
         :key="todo.id"
@@ -258,6 +265,9 @@ function onDragEnd() {
           <span v-if="todo.isDDay && !todo.done" class="todo-dday-badge" :title="todo._dateKey + ' 마감'">
             {{ getDDayText(todo._dateKey) }}
           </span>
+          <span v-if="todo.tag && todo.tag !== '일반' && !todo.done" class="todo-tag-badge" :class="`tag-${todo.tag === '업무' ? 'work' : todo.tag === '개인' ? 'personal' : 'study'}`">
+            {{ todo.tag }}
+          </span>
           {{ todo.text }}
         </span>
 
@@ -274,6 +284,16 @@ function onDragEnd() {
 
         <div class="action-buttons">
           <button
+            v-if="!todo.done"
+            class="edit-button"
+            type="button"
+            @click="startEdit(todo)"
+            title="수정하기"
+          >
+            ✏️
+          </button>
+          <button
+            v-if="!todo.done"
             class="flag-button"
             type="button"
             :class="{ active: todo.isDDay }"
@@ -288,6 +308,12 @@ function onDragEnd() {
         </div>
       </li>
     </ul>
+
+    <div class="empty-state" v-else>
+      <div class="empty-icon">✨</div>
+      <p>오늘은 어떤 멋진 일정이 있나요?</p>
+      <span>새로운 할 일을 추가해보세요!</span>
+    </div>
 
     <button class="clear-button" type="button" @click="clearCompleted">
       완료한 항목 지우기
@@ -351,7 +377,7 @@ function onDragEnd() {
 
 .todo-form {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: auto 1fr auto;
   gap: 10px;
   margin-top: 20px;
 }
@@ -369,6 +395,24 @@ input {
 
 input::placeholder {
   color: var(--text-muted);
+}
+
+.tag-select {
+  padding: 14px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: 14px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-heading);
+  background: var(--input-bg);
+  transition: all 0.2s;
+  cursor: pointer;
+  outline: none;
+}
+
+.tag-select:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
 }
 
 input:focus {
@@ -469,6 +513,25 @@ button {
   white-space: nowrap;
 }
 
+.todo-tag-badge {
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #fff;
+}
+
+.tag-work {
+  background: #f59e0b; /* orange */
+}
+.tag-personal {
+  background: #10b981; /* emerald */
+}
+.tag-study {
+  background: #8b5cf6; /* violet */
+}
+
 .order-controls {
   display: flex;
   align-items: center;
@@ -548,6 +611,20 @@ button {
   box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.3);
 }
 
+.edit-button {
+  padding: 8px;
+  background: transparent;
+  font-size: 0.95rem;
+  opacity: 0.6;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.edit-button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
 .delete-button {
   padding: 10px 12px;
   color: var(--btn-delete-text);
@@ -592,6 +669,44 @@ button {
   outline: 3px solid rgba(59, 130, 246, 0.18);
   border-color: #60a5fa;
   background: #fff;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  margin: 20px 0;
+  text-align: center;
+  background: rgba(248, 250, 252, 0.5);
+  border: 1px dashed #cbd5e1;
+  border-radius: 20px;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  animation: floatIcon 3s ease-in-out infinite;
+}
+
+.empty-state p {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #334155;
+  margin: 0 0 6px 0;
+}
+
+.empty-state span {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+@keyframes floatIcon {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
 }
 
 @media (max-width: 640px) {
