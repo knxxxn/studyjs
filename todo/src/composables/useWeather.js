@@ -39,8 +39,9 @@ export function useWeather(selectedRegion) {
 
   const forecastList = ref([])
   const weatherError = ref(false)
+  let abortController = null
 
-  async function fetchCurrentWeather() {
+  async function fetchCurrentWeather(signal) {
     try {
       const now = new Date()
       let year = now.getFullYear()
@@ -73,7 +74,7 @@ export function useWeather(selectedRegion) {
         url = `/api/weather?type=ultra&pageNo=1&numOfRows=60&base_date=${baseDate}&base_time=${baseTime}&nx=${nx}&ny=${ny}`
       }
 
-      const response = await fetch(url)
+      const response = await fetch(url, { signal })
       const json = await response.json()
 
       if (json.response?.header?.resultCode === '00') {
@@ -99,6 +100,7 @@ export function useWeather(selectedRegion) {
         }
       }
     } catch (error) {
+      if (error.name === 'AbortError') return
       console.error('Fetch current weather failed:', error)
       weatherError.value = true
       weatherData.value = {
@@ -110,7 +112,7 @@ export function useWeather(selectedRegion) {
     }
   }
 
-  async function fetchShortTermForecast() {
+  async function fetchShortTermForecast(signal) {
     try {
       const now = new Date()
       let year = now.getFullYear()
@@ -152,7 +154,7 @@ export function useWeather(selectedRegion) {
         url = `/api/weather?type=vilage&pageNo=1&numOfRows=120&base_date=${baseDate}&base_time=${baseTime}&nx=${nx}&ny=${ny}`
       }
 
-      const response = await fetch(url)
+      const response = await fetch(url, { signal })
       const json = await response.json()
 
       if (json.response?.header?.resultCode === '00') {
@@ -189,16 +191,23 @@ export function useWeather(selectedRegion) {
         })
       }
     } catch (error) {
+      if (error.name === 'AbortError') return
       console.error('Fetch short term forecast failed:', error)
       weatherError.value = true
     }
   }
 
   async function fetchWeather() {
+    if (abortController) {
+      abortController.abort()
+    }
+    abortController = new AbortController()
+    const signal = abortController.signal
+
     weatherData.value.condition = '로딩중'
     weatherData.value.summary = '날씨를 갱신하고 있습니다...'
     weatherError.value = false
-    await Promise.all([fetchCurrentWeather(), fetchShortTermForecast()]);
+    await Promise.all([fetchCurrentWeather(signal), fetchShortTermForecast(signal)]);
   }
 
   return {

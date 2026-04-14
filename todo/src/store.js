@@ -5,8 +5,11 @@ import { usePersistedRef } from './composables/usePersistedRef.js'
 // 기존 익스포트들이 날짜 유틸 등을 사용하던 컴포넌트를 위해 다시 익스포트 해줍니다.
 export { formatDate, getDDayText } from './utils/dateUtils.js'
 
-const today = new Date()
-export const selectedDateStr = ref(formatDate(today))
+export function getTodayStr() {
+  return formatDate(new Date())
+}
+
+export const selectedDateStr = ref(getTodayStr())
 
 const STORAGE_KEY = 'studyjs-todos'
 const MEMO_STORAGE_KEY = 'studyjs-memos'
@@ -62,7 +65,7 @@ if (savedTodos) {
   try {
     const parsed = JSON.parse(savedTodos)
     if (Array.isArray(parsed)) {
-      initialTodos = { [formatDate(today)]: parsed }
+      initialTodos = { [formatDate(new Date())]: parsed }
     } else {
       initialTodos = parsed
     }

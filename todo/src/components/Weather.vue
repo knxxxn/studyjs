@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { selectedDateStr, todosByDate, globalDDay, formatDate, getDDayText } from '../store.js'
 import { isSameDate } from '../utils/dateUtils.js'
 import { REGIONS } from '../constants/regions.js'
@@ -110,8 +110,9 @@ watch(selectedRegion, () => {
   fetchWeather()
 })
 
-const today = new Date()
-const currentMonth = ref(new Date(today.getFullYear(), today.getMonth(), 1))
+const todayDate = ref(new Date())
+let todayTimer = null
+const currentMonth = ref(new Date(todayDate.value.getFullYear(), todayDate.value.getMonth(), 1))
 
 const selectedDate = computed({
   get: () => new Date(selectedDateStr.value),
@@ -153,7 +154,7 @@ const calendarDays = computed(() => {
       date,
       hasTodos,
       isCurrentMonth: date.getMonth() === month,
-      isToday: isSameDate(date, today),
+      isToday: isSameDate(date, todayDate.value),
       isSelected: dateStr === selectedDateStr.value,
     }
   })
@@ -172,12 +173,20 @@ function selectDate(date) {
 }
 
 function goToToday() {
-  currentMonth.value = new Date(today.getFullYear(), today.getMonth(), 1)
-  selectedDate.value = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  currentMonth.value = new Date(todayDate.value.getFullYear(), todayDate.value.getMonth(), 1)
+  selectedDate.value = new Date(todayDate.value.getFullYear(), todayDate.value.getMonth(), todayDate.value.getDate())
 }
 
 onMounted(() => {
   fetchWeather()
+  todayTimer = setInterval(() => {
+    todayDate.value = new Date()
+  }, 60000)
+})
+
+onUnmounted(() => {
+  if (particleTimer) clearInterval(particleTimer)
+  if (todayTimer) clearInterval(todayTimer)
 })
 </script>
 
@@ -344,7 +353,8 @@ onMounted(() => {
   border: 1px solid var(--panel-border);
   border-radius: 24px;
   background: var(--panel-bg);
-  box-shadow: 0 20px 45px var(--shadow-color);
+  box-shadow: 0 8px 24px var(--shadow-color);
+  opacity: 0.98;
 }
 
 .weather-panel {
@@ -485,6 +495,7 @@ onMounted(() => {
   transition: all 0.5s ease;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 /* 밤 테마 (어두움) */
@@ -585,7 +596,7 @@ onMounted(() => {
 .temperature {
   font-size: 3rem;
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.25;
 }
 
 .temperature span {
@@ -611,6 +622,7 @@ onMounted(() => {
   border-radius: 22px;
   border: 1px solid var(--panel-border);
   background: var(--item-bg);
+  flex-shrink: 0;
 }
 
 .forecast-title {

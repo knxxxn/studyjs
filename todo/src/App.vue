@@ -1,30 +1,37 @@
 <script setup>
-import { ref, watchEffect, onMounted } from 'vue'
+import { ref, watchEffect, onMounted, onUnmounted } from 'vue'
 import TodoList from './components/TodoList.vue'
 import Weather from './components/Weather.vue'
 
 const theme = ref(localStorage.getItem('user-theme') || 'system')
+const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
 
-onMounted(() => {
-  applyTheme(theme.value)
-})
-
-watchEffect(() => {
-  applyTheme(theme.value)
-  localStorage.setItem('user-theme', theme.value)
-})
-
-function applyTheme(newTheme) {
-  if (newTheme === 'system') {
-    document.documentElement.removeAttribute('data-theme')
-  } else {
-    document.documentElement.setAttribute('data-theme', newTheme)
+function updateSystemTheme(e) {
+  if (theme.value === 'system') {
+    document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light')
   }
 }
 
+onMounted(() => {
+  mediaQuery.addEventListener('change', updateSystemTheme)
+})
+
+onUnmounted(() => {
+  mediaQuery.removeEventListener('change', updateSystemTheme)
+})
+
+watchEffect(() => {
+  if (theme.value === 'system') {
+    document.documentElement.setAttribute('data-theme', mediaQuery.matches ? 'dark' : 'light')
+  } else {
+    document.documentElement.setAttribute('data-theme', theme.value)
+  }
+  localStorage.setItem('user-theme', theme.value)
+})
+
 function toggleTheme() {
   const currentTheme = theme.value === 'system' 
-    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    ? (mediaQuery.matches ? 'dark' : 'light')
     : theme.value
 
   theme.value = currentTheme === 'dark' ? 'light' : 'dark'
@@ -88,8 +95,28 @@ function setSystemTheme() {
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 860px) {
+  .app-shell {
+    height: 100vh;
+    padding: 20px 0;
+    overflow: hidden;
+  }
+  
+  .card-grid {
+    grid-template-columns: 1.4fr 1fr;
+    height: calc(100vh - 100px);
+  }
+  
+  :deep(.panel) {
+    height: 100%;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+  }
 }
 
 @media (max-width: 640px) {

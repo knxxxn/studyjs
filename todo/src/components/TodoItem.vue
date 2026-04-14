@@ -89,7 +89,7 @@ function cancelEdit() {
       :style="{ color: todo.done ? '#16a34a' : '#1d4ed8' }"
       @click="emit('toggle-done')"
     >
-      {{ todo.done ? '이걸 해냄' : '해야 함' }}
+      {{ todo.done ? '✓ 완료됨' : '○ 완료' }}
     </button>
 
     <span class="todo-text" v-if="!isEditing" @dblclick="startEdit" :title="todo.done ? '' : '더블 클릭으로 편집'">
@@ -117,25 +117,25 @@ function cancelEdit() {
     <div class="action-buttons">
       <button
         v-if="!todo.done"
-        class="edit-button"
+        class="action-btn edit-button"
         type="button"
         @click="startEdit"
         title="수정하기"
       >
-        ✏️
+        ✏️ 수정
       </button>
       <button
         v-if="!todo.done"
-        class="flag-button"
+        class="action-btn flag-button"
         type="button"
         :class="{ active: todo.isDDay }"
         @click="emit('toggle-dday')"
-        title="디데이 뱃지 토글"
+        title="디데이 추가/해제"
       >
-        🚩
+        🚩 D-Day
       </button>
-      <button class="delete-button" type="button" @click="emit('remove')">
-        삭제
+      <button class="action-btn delete-button" type="button" @click="emit('remove')">
+        🗑️ 삭제
       </button>
     </div>
   </li>
@@ -294,45 +294,46 @@ button {
   gap: 8px;
 }
 
-.flag-button {
-  padding: 8px;
-  background: transparent;
-  opacity: 0.4;
-  font-size: 1rem;
-  transition: all 0.2s;
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 8px;
+  transition: all 0.15s;
   line-height: 1;
 }
 
-.flag-button:hover {
-  background: #f1f5f9;
-  opacity: 0.8;
-}
-
-.flag-button.active {
-  opacity: 1;
-  background: var(--btn-delete-bg);
-  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.3);
+.action-btn:hover {
+  transform: translateY(-1px);
 }
 
 .edit-button {
-  padding: 8px;
-  background: transparent;
-  font-size: 0.95rem;
-  opacity: 0.6;
-  transition: all 0.2s;
-  line-height: 1;
+  color: #0284c7;
+  background: #e0f2fe;
 }
+.edit-button:hover { background: #bae6fd; }
 
-.edit-button:hover {
-  opacity: 1;
-  transform: scale(1.1);
+.flag-button {
+  color: #d97706;
+  background: #fef3c7;
+}
+.flag-button:hover { background: #fde68a; }
+
+.flag-button.active {
+  color: #b45309;
+  background: #fcd34d;
+  box-shadow: inset 0 0 0 1px #f59e0b;
 }
 
 .delete-button {
-  padding: 10px 12px;
   color: var(--btn-delete-text);
   background: var(--btn-delete-bg);
-  font-weight: 700;
+}
+.delete-button:hover {
+  opacity: 0.8;
 }
 
 @media (max-width: 640px) {
