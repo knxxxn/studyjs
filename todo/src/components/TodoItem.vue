@@ -89,7 +89,7 @@ function cancelEdit() {
       :style="{ color: todo.done ? '#16a34a' : '#1d4ed8' }"
       @click="emit('toggle-done')"
     >
-      {{ todo.done ? '✓ 완료됨' : '○ 완료' }}
+      {{ todo.done ? '✓ 이걸 해냄' : '○ 해야 함' }}
     </button>
 
     <span class="todo-text" v-if="!isEditing" @dblclick="startEdit" :title="todo.done ? '' : '더블 클릭으로 편집'">
