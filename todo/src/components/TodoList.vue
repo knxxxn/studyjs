@@ -80,7 +80,6 @@ function addTodo() {
   
   showToast('항목이 추가되었습니다 ✨')
   todoInput.value = ''
-  selectedTag.value = '일반'
   
   nextTick(() => {
     todoInputRef.value?.focus()
@@ -207,7 +206,7 @@ function clearDragState() {
   <article class="panel scrollable-panel">
     <div class="panel-header">
       <div>
-        <h1 class="gradient-text">Todo List</h1>
+        <h1 class="gradient-text">TODO LIST</h1>
         <p class="date-subtitle">{{ selectedDateStr }}</p>
       </div>
       <span class="badge">남은 일 <strong style="font-size: 1.1rem; margin-left: 2px">{{ remainingCount }}</strong>개</span>
@@ -235,7 +234,7 @@ function clearDragState() {
         ref="todoInputRef"
         v-model="todoInput" 
         type="text" 
-        placeholder="어떤 일을 완료해야 하나요?" 
+        placeholder="무슨 일을 할건가요?" 
       />
       <button class="btn-primary" type="submit">추가</button>
     </form>
@@ -356,18 +355,7 @@ function clearDragState() {
 </template>
 
 <style scoped>
-.panel {
-  display: flex;
-  flex-direction: column;
-  padding: 24px;
-  border: 1px solid var(--panel-border);
-  border-radius: 24px;
-  background: var(--panel-bg);
-  box-shadow: 0 10px 40px var(--shadow-color);
-  color: var(--color-text);
-}
 
-/* DeskTop Height Control handled in App.vue */
 .scrollable-panel {
   display: flex;
   flex-direction: column;
@@ -383,11 +371,6 @@ function clearDragState() {
 .gradient-text {
   font-size: 2.2rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #1d4ed8 40%, #0284c7);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-block;
   margin: 0;
   line-height: 1.1;
 }
@@ -597,9 +580,10 @@ button {
   padding: 50px 20px;
   margin: 30px 0;
   text-align: center;
-  background: rgba(248, 250, 252, 0.5);
-  border: 2px dashed var(--input-border);
-  border-radius: 20px;
+  background: var(--item-bg);
+  opacity: 0.95;
+  border: 2px dashed var(--panel-border);
+  border-radius: 24px;
 }
 
 .empty-icon {

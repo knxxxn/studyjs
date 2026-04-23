@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { marked } from 'marked'
 
 const keyword = ref('')
 const isLoading = ref(false)
@@ -27,20 +28,28 @@ async function fetchNews() {
     isLoading.value = false
   }
 }
+
+const renderedSummary = computed(() => {
+  if (!newsData.value || !newsData.value.summary) return ''
+  return marked.parse(newsData.value.summary)
+})
 </script>
 
 <template>
   <div class="panel news-panel">
     <header class="panel-header">
-      <h2>📰 오늘의 뉴스 요약</h2>
-      <p class="subtitle">AI가 최신 트렌드를 분석해 드립니다</p>
+      <div class="title-group">
+        <h1 class="gradient-text">TODAY NEWS</h1>
+      </div>
+      
+      <p class="subtitle"> AI가 최신 뉴스를 요약해 드립니다</p> 
     </header>
     
     <div class="search-box">
       <input 
         v-model="keyword" 
         @keyup.enter="fetchNews" 
-        placeholder="관심 키워드 (비워두면 종합 뉴스)"
+        placeholder="관심 키워드를 입력하세요 (비워두면 종합 뉴스로 검색합니다)"
         class="search-input"
         :disabled="isLoading"
       />
@@ -57,7 +66,7 @@ async function fetchNews() {
     <div v-if="newsData" class="news-content">
       <div class="summary-box">
         <h3>✨ AI 인사이트</h3>
-        <div class="summary-text">{{ newsData.summary }}</div>
+        <div class="summary-text" v-html="renderedSummary"></div>
       </div>
       
       <div class="news-list-box">
@@ -77,18 +86,35 @@ async function fetchNews() {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding-left: 30px; /* 사이드바와 입력창 사이의 간격 확보 */
 }
 
-.panel-header h2 {
+.title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  margin-bottom: 20px; /* 제목과 소제목 사이 간격을 더 넓게 */
+}
+
+.header-emoji {
+  font-size: 2.2rem;
+}
+
+.gradient-text {
+  font-size: 2.2rem;
+  font-weight: 800;
   margin: 0;
-  font-size: 1.5rem;
-  color: var(--color-heading);
+  line-height: 1.1;
 }
 
 .subtitle {
   color: var(--color-text-mute);
   font-size: 0.9rem;
-  margin-top: 4px;
+  font-weight: 500;
+  text-indent: 0.5em;
+  margin-top: 0;
+  margin-bottom: 12px; /* 소제목과 입력창 사이 간격은 좁게 */
 }
 
 .search-box {
@@ -164,9 +190,24 @@ async function fetchNews() {
 }
 
 .summary-text {
-  white-space: pre-wrap;
   line-height: 1.6;
   color: var(--color-text);
+}
+
+.summary-text :deep(strong) {
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+.summary-text :deep(p) {
+  margin-bottom: 12px;
+}
+.summary-text :deep(ul) {
+  padding-left: 20px;
+  margin-bottom: 12px;
+}
+.summary-text :deep(li) {
+  margin-bottom: 8px;
 }
 
 .news-list-box {

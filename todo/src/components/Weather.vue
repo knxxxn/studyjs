@@ -194,7 +194,7 @@ onUnmounted(() => {
   <article class="panel weather-panel">
     <div class="panel-header">
       <div>
-        <h2 class="gradient-text">Weather</h2>
+        <h1 class="gradient-text">WEATHER</h1>
       </div>
       <div class="header-right">
         <button type="button" class="region-button" @click="showRegionModal = true">
@@ -347,15 +347,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.panel {
-  height: 100%;
-  padding: 24px;
-  border: 1px solid var(--panel-border);
-  border-radius: 24px;
-  background: var(--panel-bg);
-  box-shadow: 0 8px 24px var(--shadow-color);
-  opacity: 0.98;
-}
 
 .weather-panel {
   display: flex;
@@ -474,14 +465,10 @@ onUnmounted(() => {
 }
 
 .gradient-text {
-  font-size: 2rem;
-  font-weight: bold;
-  background: linear-gradient(135deg, #1d4ed8 55%, #0284c7);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-block;
-  text-transform: uppercase;
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
 }
 
 .weather-icon {
