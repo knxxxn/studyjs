@@ -17,6 +17,14 @@ watchEffect(() => {
 function toggleTheme() {
   theme.value = theme.value === 'dark' ? 'light' : 'dark'
 }
+
+function changeView(view) {
+  currentView.value = view
+  // 860px(모바일 및 태블릿 레이아웃) 이하에서는 메뉴 이동 시 사이드바를 닫기
+  if (window.innerWidth <= 860) {
+    isNavExpanded.value = false
+  }
+}
 </script>
 
 <template>
@@ -34,14 +42,14 @@ function toggleTheme() {
       </div>
       <nav class="nav-menu" v-show="isNavExpanded">
         <button 
-          @click="currentView = 'dashboard'" 
+          @click="changeView('dashboard')" 
           :class="{ active: currentView === 'dashboard' }"
           class="nav-btn"
         >
           ✅ 투두 대시보드
         </button>
         <button 
-          @click="currentView = 'news'" 
+          @click="changeView('news')" 
           :class="{ active: currentView === 'news' }"
           class="nav-btn"
         >
