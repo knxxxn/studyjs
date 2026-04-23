@@ -191,6 +191,7 @@ body {
   box-shadow: 0 10px 40px var(--shadow-color);
   color: var(--color-text);
   box-sizing: border-box;
+  min-width: 0; /* 내부 가로 스크롤 요소로 인해 너비가 늘어나는 것 방지 */
 }
 
 .gradient-text {

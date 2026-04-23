@@ -344,7 +344,14 @@ button {
 
 @media (max-width: 640px) {
   li {
-    grid-template-columns: auto auto 1fr auto;
+    grid-template-columns: auto auto 1fr;
+    row-gap: 12px;
+  }
+  .action-buttons {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    padding-top: 10px;
+    border-top: 1px dashed var(--input-border);
   }
 }
 </style>
