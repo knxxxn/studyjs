@@ -85,8 +85,8 @@ function cancelEdit() {
 
     <button
       class="toggle-button"
+      :class="{ 'is-done': todo.done }"
       type="button"
-      :style="{ color: todo.done ? '#16a34a' : '#1d4ed8' }"
       @click="emit('toggle-done')"
     >
       {{ todo.done ? '✓ 이걸 해냄' : '○ 해야 함' }}
@@ -243,7 +243,7 @@ button {
 
 .drag-handle {
   font-size: 1.2rem;
-  color: #94a3b8;
+  color: var(--drag-handle);
   cursor: grab;
   padding: 0 2px;
   user-select: none;
@@ -264,8 +264,8 @@ button {
   padding: 2px 6px;
   font-size: 0.65rem;
   border-radius: 6px;
-  background: #e2e8f0;
-  color: #475569;
+  background: var(--arrow-btn-bg);
+  color: var(--arrow-btn-text);
   line-height: 1;
   transition: background 0.1s;
 }
@@ -287,6 +287,12 @@ button {
   color: var(--btn-toggle-text);
   font-size: 0.88rem;
   font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.toggle-button.is-done {
+  background: var(--btn-toggle-done-bg);
+  color: var(--btn-toggle-done-text);
 }
 
 .action-buttons {

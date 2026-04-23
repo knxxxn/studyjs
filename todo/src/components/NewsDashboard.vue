@@ -55,7 +55,7 @@ const renderedSummary = computed(() => {
       />
       <button @click="fetchNews" class="btn btn-primary" :disabled="isLoading">
         <span v-if="isLoading">⏳ 분석 중...</span>
-        <span v-else>요약하기</span>
+        <span v-else>요약</span>
       </button>
     </div>
 

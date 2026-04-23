@@ -91,7 +91,7 @@ function toggleTodo(todo) {
   const target = list.find((item) => item.id === todo.id)
   if (target) {
     target.done = !target.done
-    showToast(target.done ? '할 일을 완료했습니다 🎉' : '완료를 취소했습니다 롤백~')
+    showToast(target.done ? '클리어 🎉' : '응 다시해 🌀')
     
     // 미완료 -> 완료: 현재 선택된 날짜로 옮기기
     if (target.done && todo._dateKey !== selectedDateStr.value) {
@@ -387,7 +387,7 @@ function clearDragState() {
 
 .date-subtitle {
   font-size: 0.95rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin-top: 4px;
   font-weight: 700;
 }
@@ -507,9 +507,9 @@ button {
   gap: 6px;
 }
 
-.overdue-title { color: #dc2626; }
-.today-title { color: #2563eb; }
-.done-title { color: #64748b; }
+.overdue-title { color: var(--title-overdue); }
+.today-title { color: var(--title-today); }
+.done-title { color: var(--title-done); }
 
 .todo-list {
   display: grid;
@@ -630,19 +630,18 @@ button {
 
 /* Toast */
 .toast-notification {
-  position: absolute;
-  bottom: 30px;
+  position: fixed;
+  top: 30px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(15, 23, 42, 0.9);
-  backdrop-filter: blur(8px);
-  color: #fff;
+  background: #eff6ff;
+  color: #2563eb;
   padding: 12px 24px;
   border-radius: 12px;
   font-size: 0.95rem;
   font-weight: 700;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  z-index: 100;
+  z-index: 1000;
   white-space: nowrap;
 }
 
@@ -653,7 +652,7 @@ button {
 .toast-enter-from,
 .toast-leave-to {
   opacity: 0;
-  transform: translate(-50%, 20px);
+  transform: translate(-50%, -20px);
 }
 
 @media (max-width: 640px) {

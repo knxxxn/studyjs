@@ -28,6 +28,9 @@ function toggleTheme() {
           <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
         <h1 v-show="isNavExpanded">메뉴</h1>
+        <button v-show="!isNavExpanded" @click="toggleTheme" class="mobile-theme-btn" title="테마 전환">
+          {{ theme === 'dark' ? '☀️' : '🌙' }}
+        </button>
       </div>
       <nav class="nav-menu" v-show="isNavExpanded">
         <button 
@@ -99,7 +102,26 @@ function toggleTheme() {
 
 .sidebar.collapsed .brand {
   margin-bottom: 0;
+  justify-content: space-between;
+}
+
+.mobile-theme-btn {
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-theme-btn:hover {
+  background: var(--color-border);
 }
 
 .hamburger-btn {
@@ -180,6 +202,11 @@ function toggleTheme() {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  text-align: center;
 }
 
 .theme-btn:hover {
@@ -247,7 +274,24 @@ function toggleTheme() {
     padding: 10px;
   }
   .sidebar {
-    padding: 16px;
+    padding: 12px 16px;
+    position: sticky;
+    top: 10px;
+    z-index: 100;
+  }
+  .sidebar.collapsed {
+    width: max-content;
+    margin: 0;
+    border-radius: 999px;
+  }
+  .mobile-theme-btn {
+    display: flex;
+  }
+}
+
+@media (min-width: 641px) {
+  .mobile-theme-btn {
+    display: none;
   }
 }
 </style>
