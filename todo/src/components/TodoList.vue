@@ -215,12 +215,12 @@ function clearDragState() {
 
     <!-- Filters -->
     <div class="filter-group">
-      <button class="filter-chip" :class="{ active: filterTag === 'all' }" @click="filterTag = 'all'">전체</button>
+      <button class="filter-chip" :class="{ active: filterTag === 'all' }" @click="filterTag = 'all'; selectedTag = '일반'">전체</button>
       <button 
         v-for="tag in tags" :key="tag" 
         class="filter-chip" 
         :class="{ active: filterTag === tag }" 
-        @click="filterTag = tag"
+        @click="filterTag = tag; selectedTag = tag"
       >
         {{ tag }}
       </button>
