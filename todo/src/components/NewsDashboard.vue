@@ -54,7 +54,7 @@ const renderedSummary = computed(() => {
         :disabled="isLoading"
       />
       <button @click="fetchNews" class="btn btn-primary" :disabled="isLoading">
-        <span v-if="isLoading">⏳ 분석 중...</span>
+        <span v-if="isLoading">⏳ 분석중...</span>
         <span v-else>요약</span>
       </button>
     </div>
@@ -86,7 +86,12 @@ const renderedSummary = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding-left: 30px; /* 사이드바와 입력창 사이의 간격 확보 */
+}
+
+@media (min-width: 860px) {
+  .news-panel {
+    padding-left: 30px; /* 사이드바와 입력창 사이의 간격 확보 */
+  }
 }
 
 .title-group {
@@ -124,6 +129,7 @@ const renderedSummary = computed(() => {
 
 .search-input {
   flex: 1;
+  min-width: 0;
   padding: 10px 14px;
   border-radius: 8px;
   border: 1px solid var(--color-border);
@@ -144,6 +150,8 @@ const renderedSummary = computed(() => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-primary {
