@@ -1,13 +1,64 @@
 <script setup>
-import { ref, watchEffect } from 'vue'
+import { ref, watchEffect, onMounted } from 'vue'
 import TodoList from './components/TodoList.vue'
 import Weather from './components/Weather.vue'
 import NewsDashboard from './components/NewsDashboard.vue'
+import LoginModal from './components/LoginModal.vue'
+import { userToken, userName, fetchFromServer } from './store.js'
+
+// 페이지 로드 시 이미 로그인되어 있으면 서버에서 데이터 불러오기
+onMounted(() => {
+  if (userToken.value) {
+    fetchFromServer()
+  }
+})
 
 const theme = ref(localStorage.getItem('user-theme') || 'light')
 
 const currentView = ref('dashboard')
 const isNavExpanded = ref(false)
+const showLoginModal = ref(false)
+const toastMsg = ref('')
+let toastTimer = null
+
+function showToast(msg) {
+  toastMsg.value = msg
+  if (toastTimer) clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { toastMsg.value = '' }, 2500)
+}
+
+function handleLogout() {
+  userToken.value = null
+  userName.value = ''
+  showToast('로그아웃 되었습니다 👋')
+}
+
+async function handleDeleteAccount() {
+  const confirmed = window.confirm(
+    '정말로 회원 탈퇴하시겠습니까?\n\n모든 투두, 메모, 캘린더 데이터가 영구 삭제되며 복구할 수 없습니다.'
+  )
+  if (!confirmed) return
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+  try {
+    const res = await fetch(`${baseUrl}/api/auth/delete-account`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${userToken.value}` }
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.detail || '탈퇴 처리 중 오류가 발생했습니다.')
+
+    // 로컬 데이터 정리
+    userToken.value = null
+    userName.value = ''
+    localStorage.removeItem('studyjs-todos')
+    localStorage.removeItem('studyjs-memos')
+    localStorage.removeItem('studyjs-global-dday')
+    showToast('회원 탈퇴가 완료되었습니다.')
+  } catch (err) {
+    showToast(`탈퇴 실패: ${err.message}`)
+  }
+}
 
 watchEffect(() => {
   document.documentElement.setAttribute('data-theme', theme.value)
@@ -56,6 +107,17 @@ function changeView(view) {
           📰 오늘의 뉴스
         </button>
       </nav>
+
+      <div class="auth-section" v-show="isNavExpanded">
+        <div v-if="userToken" class="user-info">
+          <span class="greeting">👋 {{ userName || '사용자' }}님</span>
+          <button @click="handleLogout" class="logout-btn">로그아웃</button>
+          <button @click="handleDeleteAccount" class="delete-account-btn">회원 탈퇴</button>
+        </div>
+        <button v-else @click="showLoginModal = true" class="login-btn">
+          🔐 로그인 / 회원가입
+        </button>
+      </div>
       <div class="sidebar-footer" v-show="isNavExpanded">
         <div class="theme-controls-vertical">
           <button @click="toggleTheme" class="theme-btn" title="테마 전환">
@@ -75,6 +137,18 @@ function changeView(view) {
         <NewsDashboard />
       </section>
     </main>
+
+    <LoginModal 
+      :show="showLoginModal" 
+      @close="showLoginModal = false" 
+    />
+
+    <!-- Toast Notification -->
+    <Transition name="toast">
+      <div v-if="toastMsg" class="toast-notification">
+        {{ toastMsg }}
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -200,6 +274,76 @@ function changeView(view) {
   gap: 8px;
 }
 
+.auth-section {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--color-background-soft);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.greeting {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.logout-btn {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: var(--color-border);
+}
+
+.delete-account-btn {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted, #999);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-account-btn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.login-btn {
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: #6366f1;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+
+.login-btn:hover {
+  background: #4f46e5;
+}
+
 .theme-btn {
   padding: 10px 16px;
   border-radius: 12px;
@@ -301,5 +445,32 @@ function changeView(view) {
   .mobile-theme-btn {
     display: none;
   }
+}
+
+/* Toast */
+.toast-notification {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 2000;
+  white-space: nowrap;
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -20px);
 }
 </style>
