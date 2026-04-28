@@ -504,125 +504,132 @@ onUnmounted(() => {
 }
 
 /* ── 날씨 조건별 배경 (낮) ── */
-/* 맑음 낮 — 따뜻한 하늘 */
+
+/* 맑음 낮 — 맑고 따뜻한 하늘 */
 .weather-card.wx-sunny-day {
-  color: #1a3a00;
-  background: linear-gradient(150deg, #87CEEB, #FFD166, #FFB347);
-  box-shadow: inset 0 2px 14px rgba(255, 255, 255, 0.4);
+  color: #3d2600;
+  background: linear-gradient(150deg, #74C0FC 0%, #FFE066 55%, #FFB347 100%);
+  box-shadow: inset 0 2px 16px rgba(255, 255, 255, 0.5);
 }
 .weather-card.wx-sunny-day .condition,
 .weather-card.wx-sunny-day .weather-summary,
-.weather-card.wx-sunny-day .fetched-at { color: rgba(30, 60, 0, 0.68); }
+.weather-card.wx-sunny-day .fetched-at { color: rgba(61, 38, 0, 0.62); }
 
-/* 구름조금 낮 */
+/* 구름조금 낮 — 연하고 맑은 파랑 */
 .weather-card.wx-partcloud-day {
   color: #023373;
-  background: linear-gradient(135deg, #CEDEF2, #A0C4F2, #6DA7F2);
-  box-shadow: inset 0 2px 12px rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #E8F4FF, #C8DEFF, #A0C4F2);
+  box-shadow: inset 0 2px 14px rgba(255, 255, 255, 0.55);
 }
 .weather-card.wx-partcloud-day .condition,
 .weather-card.wx-partcloud-day .weather-summary,
-.weather-card.wx-partcloud-day .fetched-at { color: rgba(2, 51, 115, 0.7); }
+.weather-card.wx-partcloud-day .fetched-at { color: rgba(2, 51, 115, 0.65); }
 
-/* 흐림 낮 */
+/* 흐림 낮 — 밝은 회청색 */
 .weather-card.wx-cloudy-day {
-  color: #1e2d3d;
-  background: linear-gradient(135deg, #8FA8C0, #7090A8, #5A7A94);
+  color: #1e3050;
+  background: linear-gradient(135deg, #C2D4E6, #A8BFCF, #8DAFC2);
+  box-shadow: inset 0 2px 12px rgba(255, 255, 255, 0.35);
 }
 .weather-card.wx-cloudy-day .condition,
 .weather-card.wx-cloudy-day .weather-summary,
-.weather-card.wx-cloudy-day .fetched-at { color: rgba(30, 45, 61, 0.7); }
+.weather-card.wx-cloudy-day .fetched-at { color: rgba(30, 48, 80, 0.65); }
 
-/* 비 낮 */
+/* 비 낮 — 선명한 파랑 */
 .weather-card.wx-rain-day {
-  color: #e8f0fb;
-  background: linear-gradient(135deg, #3A5F8A, #2C4A72, #1E3558);
+  color: #e8f4ff;
+  background: linear-gradient(135deg, #5B8DB8, #4070A0, #2E5580);
+  box-shadow: inset 0 2px 10px rgba(255, 255, 255, 0.2);
 }
 .weather-card.wx-rain-day .condition,
 .weather-card.wx-rain-day .weather-summary,
-.weather-card.wx-rain-day .fetched-at { color: rgba(206, 222, 242, 0.78); }
+.weather-card.wx-rain-day .fetched-at { color: rgba(220, 238, 255, 0.78); }
 
-/* 눈 낮 */
+/* 눈 낮 — 맑고 밝은 아이시 블루 */
 .weather-card.wx-snow-day {
-  color: #0a2040;
-  background: linear-gradient(135deg, #D6EAF8, #BDD7EE, #A3C4E4);
-  box-shadow: inset 0 2px 12px rgba(255, 255, 255, 0.5);
+  color: #0a2855;
+  background: linear-gradient(135deg, #EAF4FF, #D0E8FA, #B8D8F2);
+  box-shadow: inset 0 2px 14px rgba(255, 255, 255, 0.6);
 }
 .weather-card.wx-snow-day .condition,
 .weather-card.wx-snow-day .weather-summary,
-.weather-card.wx-snow-day .fetched-at { color: rgba(10, 32, 64, 0.65); }
+.weather-card.wx-snow-day .fetched-at { color: rgba(10, 40, 85, 0.6); }
 
 /* ── 날씨 조건별 배경 (밤) ── */
-/* 맑음 밤 — 깊은 자주빛 하늘 */
+
+/* 맑음 밤 — 보랏빛 별하늘 (좀 더 밝게) */
 .weather-card.wx-sunny-night {
-  color: #f0e8ff;
-  background: linear-gradient(135deg, #0D0820, #1C0D4A, #2D1070);
+  color: #e8d8ff;
+  background: linear-gradient(135deg, #1A0E3A, #2E1A65, #4A2890);
 }
 .weather-card.wx-sunny-night .condition,
 .weather-card.wx-sunny-night .weather-summary,
-.weather-card.wx-sunny-night .fetched-at { color: rgba(224, 210, 255, 0.75); }
+.weather-card.wx-sunny-night .fetched-at { color: rgba(220, 200, 255, 0.78); }
 
-/* 구름많음 밤 */
+/* 구름많음 밤 — 차분한 파랑 (좀 더 밝게) */
 .weather-card.wx-partcloud-night {
-  color: #e8f0fb;
-  background: linear-gradient(135deg, #0E155E, #023373, #035AA6);
+  color: #d0e4f8;
+  background: linear-gradient(135deg, #162050, #1E3070, #285090);
 }
 .weather-card.wx-partcloud-night .condition,
 .weather-card.wx-partcloud-night .weather-summary,
-.weather-card.wx-partcloud-night .fetched-at { color: rgba(206, 222, 242, 0.78); }
+.weather-card.wx-partcloud-night .fetched-at { color: rgba(200, 228, 248, 0.78); }
 
-/* 흐림 밤 */
+/* 흐림 밤 — 회청색 (더 밝게) */
 .weather-card.wx-cloudy-night {
-  color: #c8d8e8;
-  background: linear-gradient(135deg, #1C2535, #243345, #2C3F55);
+  color: #c8ddf0;
+  background: linear-gradient(135deg, #283848, #344A5C, #405870);
 }
 .weather-card.wx-cloudy-night .condition,
 .weather-card.wx-cloudy-night .weather-summary,
-.weather-card.wx-cloudy-night .fetched-at { color: rgba(200, 216, 232, 0.72); }
+.weather-card.wx-cloudy-night .fetched-at { color: rgba(200, 221, 240, 0.75); }
 
-/* 비 밤 */
+/* 비 밤 — 다크 블루 (더 밝게) */
 .weather-card.wx-rain-night {
-  color: #b0c8e0;
-  background: linear-gradient(135deg, #0A1628, #10243E, #162E50);
+  color: #b8d4ee;
+  background: linear-gradient(135deg, #182840, #204060, #285278);
 }
 .weather-card.wx-rain-night .condition,
 .weather-card.wx-rain-night .weather-summary,
-.weather-card.wx-rain-night .fetched-at { color: rgba(176, 200, 224, 0.72); }
+.weather-card.wx-rain-night .fetched-at { color: rgba(184, 212, 238, 0.75); }
 
-/* 눈 밤 */
+/* 눈 밤 — 아이시 다크 (더 밝게) */
 .weather-card.wx-snow-night {
-  color: #c8dff0;
-  background: linear-gradient(135deg, #141F35, #1A2A4A, #203360);
+  color: #cce4f8;
+  background: linear-gradient(135deg, #1E3050, #28406A, #305080);
 }
 .weather-card.wx-snow-night .condition,
 .weather-card.wx-snow-night .weather-summary,
-.weather-card.wx-snow-night .fetched-at { color: rgba(200, 223, 240, 0.72); }
+.weather-card.wx-snow-night .fetched-at { color: rgba(204, 228, 248, 0.75); }
 
-/* 진눈깨비 */
+/* 진눈깨비 — 콜드 슬레이트 (더 밝게) */
 .weather-card.wx-sleet {
-  color: #d0dff0;
-  background: linear-gradient(135deg, #3A5070, #4A6080, #56708A);
+  color: #d0e6f8;
+  background: linear-gradient(135deg, #506880, #607888, #708898);
+  box-shadow: inset 0 2px 10px rgba(255, 255, 255, 0.15);
 }
 .weather-card.wx-sleet .condition,
 .weather-card.wx-sleet .weather-summary,
-.weather-card.wx-sleet .fetched-at { color: rgba(208, 223, 240, 0.75); }
+.weather-card.wx-sleet .fetched-at { color: rgba(208, 230, 248, 0.78); }
 
 /* 기본 (데이터 없을 때) */
 .weather-card.wx-default-day {
   color: #023373;
-  background: linear-gradient(135deg, #CEDEF2, #A0C4F2, #6DA7F2);
+  background: linear-gradient(135deg, #E8F4FF, #C8DEFF, #A0C4F2);
+  box-shadow: inset 0 2px 12px rgba(255, 255, 255, 0.5);
 }
 .weather-card.wx-default-day .condition,
 .weather-card.wx-default-day .weather-summary,
-.weather-card.wx-default-day .fetched-at { color: rgba(2, 51, 115, 0.7); }
+.weather-card.wx-default-day .fetched-at { color: rgba(2, 51, 115, 0.65); }
 
 .weather-card.wx-default-night {
-  color: #e8f0fb;
-  background: linear-gradient(135deg, #0E155E, #023373, #035AA6);
+  color: #c8e0f8;
+  background: linear-gradient(135deg, #162050, #1E3070, #285090);
 }
 .weather-card.wx-default-night .condition,
 .weather-card.wx-default-night .weather-summary,
-.weather-card.wx-default-night .fetched-at { color: rgba(206, 222, 242, 0.8); }
+.weather-card.wx-default-night .fetched-at { color: rgba(200, 224, 248, 0.8); }
+
 
 
 /* z-index to bring text above animations */

@@ -71,10 +71,8 @@ function toggleTheme() {
 
 function changeView(view) {
   currentView.value = view
-  // 860px(모바일 및 태블릿 레이아웃) 이하에서는 메뉴 이동 시 사이드바를 닫기
-  if (window.innerWidth <= 860) {
-    isNavExpanded.value = false
-  }
+  // 뷷 전환 시 항상 사이드바 닫기
+  isNavExpanded.value = false
 }
 </script>
 
@@ -86,12 +84,12 @@ function changeView(view) {
           <svg v-if="!isNavExpanded" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
           <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
-        <h1 v-show="isNavExpanded">메뉴</h1>
+        <h1 v-show="isNavExpanded">MENU</h1>
         <button v-show="!isNavExpanded" @click="toggleTheme" class="mobile-theme-btn" title="테마 전환">
           {{ theme === 'dark' ? '☀️' : '🌙' }}
         </button>
       </div>
-      <nav class="nav-menu" v-show="isNavExpanded">
+      <nav class="nav-menu">
         <button 
           @click="changeView('dashboard')" 
           :class="{ active: currentView === 'dashboard' }"
@@ -108,7 +106,7 @@ function changeView(view) {
         </button>
       </nav>
 
-      <div class="auth-section" v-show="isNavExpanded">
+      <div class="auth-section">
         <div v-if="userToken" class="user-info">
           <span class="greeting">👋 {{ userName || '사용자' }}님</span>
           <button @click="handleLogout" class="logout-btn">로그아웃</button>
@@ -118,7 +116,7 @@ function changeView(view) {
           🔐 로그인 / 회원가입
         </button>
       </div>
-      <div class="sidebar-footer" v-show="isNavExpanded">
+      <div class="sidebar-footer">
         <div class="theme-controls-vertical">
           <button @click="toggleTheme" class="theme-btn" title="테마 전환">
             {{ theme === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드' }}
@@ -167,12 +165,34 @@ function changeView(view) {
   display: flex;
   flex-direction: column;
   padding: 24px;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+  transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1), padding 0.32s ease;
   overflow: hidden;
 }
 
 .sidebar.collapsed {
   padding: 16px;
+}
+
+/* ── 사이드바 콘텐츠 전환 트랜지션 ── */
+/* 닫힐 때: 즉시 숨김 */
+.nav-menu,
+.auth-section,
+.sidebar-footer {
+  opacity: 1;
+  pointer-events: auto;
+  /* 열릴 때: width 애니(0.32s) 끝난 뒤 페이드인 */
+  transition: opacity 0.2s ease 0.28s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .nav-menu,
+.sidebar.collapsed .auth-section,
+.sidebar.collapsed .sidebar-footer {
+  opacity: 0;
+  pointer-events: none;
+  /* 닫힐 때: 빠르게 숨기고 지연 없이 */
+  transition: opacity 0.1s ease;
 }
 
 .brand {
@@ -223,49 +243,59 @@ function changeView(view) {
   background: var(--color-background-soft);
 }
 
+/* ── 메뉴 제목 ── */
 .brand h1 {
   margin: 0;
-  font-size: 1.5rem;
-  color: var(--color-heading);
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+  color: #035AA6;
   white-space: nowrap;
   overflow: hidden;
+  letter-spacing: -0.3px;
 }
 
+/* ── 네비게이션 메뉴 ── */
 .nav-menu {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
   flex: 1;
 }
 
 .nav-btn {
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 1px solid transparent;
+  padding: 11px 16px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid transparent;
   background: transparent;
-  color: var(--color-text);
-  font-size: 1.1rem;
-  font-weight: 600;
+  color: #035AA6;
+  font-size: 0.97rem;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
   text-align: left;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s ease;
   white-space: nowrap;
   overflow: hidden;
+  letter-spacing: 0.01em;
 }
 
 .nav-btn:hover {
-  background: var(--color-background-soft);
+  background: rgba(3, 90, 166, 0.08);
+  border-color: rgba(3, 90, 166, 0.18);
 }
 
 .nav-btn.active {
-  background: var(--color-background-soft);
-  border-color: var(--color-border);
-  color: #6366f1;
+  background: rgba(3, 90, 166, 0.12);
+  border-color: rgba(3, 90, 166, 0.3);
+  color: #035AA6;
+  font-weight: 800;
 }
 
+/* ── 사이드바 푸터 ── */
 .sidebar-footer {
   margin-top: auto;
-  padding-top: 24px;
+  padding-top: 20px;
 }
 
 .theme-controls-vertical {
@@ -274,10 +304,13 @@ function changeView(view) {
   gap: 8px;
 }
 
+/* ── 인증 섹션 ── */
 .auth-section {
   margin-top: 16px;
   display: flex;
   flex-direction: column;
+  /* 애니메이션: 잠김 시 overflow 단갈 방지 */
+  overflow: hidden;
 }
 
 .user-info {
@@ -285,39 +318,43 @@ function changeView(view) {
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  background: var(--color-background-soft);
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
+  background: rgba(3, 90, 166, 0.06);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(3, 90, 166, 0.18);
 }
 
 .greeting {
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: var(--color-text);
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #035AA6;
+  font-family: 'Outfit', sans-serif;
 }
 
 .logout-btn {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid var(--color-border);
-  background: var(--color-background);
-  color: var(--color-text);
+  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid rgba(3, 90, 166, 0.3);
+  background: transparent;
+  color: #035AA6;
   font-size: 0.85rem;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .logout-btn:hover {
-  background: var(--color-border);
+  background: rgba(3, 90, 166, 0.1);
 }
 
 .delete-account-btn {
-  padding: 8px;
-  border-radius: 8px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
   border: 1px solid transparent;
   background: transparent;
-  color: var(--text-muted, #999);
-  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -328,32 +365,38 @@ function changeView(view) {
   border-color: #fca5a5;
 }
 
+/* ── 로그인 버튼 ── */
 .login-btn {
-  padding: 12px;
-  border-radius: 12px;
+  padding: 11px 16px;
+  border-radius: var(--radius-pill);
   border: none;
-  background: #6366f1;
+  background: #6DA7F2;
   color: white;
-  font-weight: 600;
+  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.22s;
   width: 100%;
+  letter-spacing: 0.02em;
 }
 
 .login-btn:hover {
-  background: #4f46e5;
+  background: #206ABC;
 }
 
+/* ── 테마 전환 버튼 ── */
 .theme-btn {
   padding: 10px 16px;
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-  background: var(--color-background-soft);
-  color: var(--color-text);
-  font-size: 0.9rem;
-  font-weight: 600;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid rgba(3, 90, 166, 0.25);
+  background: transparent;
+  color: #035AA6;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s ease;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -362,12 +405,76 @@ function changeView(view) {
 }
 
 .theme-btn:hover {
-  background: var(--color-border);
+  background: rgba(3, 90, 166, 0.08);
+  border-color: rgba(3, 90, 166, 0.4);
 }
 
 .system-btn {
   background: var(--color-background-mute);
 }
+
+/* ── 다크모드: 사이드바 글자 밝게 ── */
+[data-theme="dark"] .brand h1,
+[data-theme="dark"] .nav-btn,
+[data-theme="dark"] .nav-btn.active,
+[data-theme="dark"] .greeting,
+[data-theme="dark"] .logout-btn,
+[data-theme="dark"] .theme-btn {
+  color: #A0C4F2;
+}
+
+[data-theme="dark"] .nav-btn:hover {
+  background: rgba(160, 196, 242, 0.12);
+  border-color: rgba(160, 196, 242, 0.28);
+  color: #CEDEF2;
+}
+
+[data-theme="dark"] .nav-btn.active {
+  background: rgba(160, 196, 242, 0.16);
+  border-color: rgba(160, 196, 242, 0.35);
+  color: #CEDEF2;
+}
+
+[data-theme="dark"] .logout-btn {
+  border-color: rgba(160, 196, 242, 0.3);
+}
+[data-theme="dark"] .logout-btn:hover {
+  background: rgba(160, 196, 242, 0.12);
+  color: #CEDEF2;
+}
+
+[data-theme="dark"] .theme-btn {
+  border-color: rgba(160, 196, 242, 0.25);
+}
+[data-theme="dark"] .theme-btn:hover {
+  background: rgba(160, 196, 242, 0.1);
+  border-color: rgba(160, 196, 242, 0.42);
+  color: #CEDEF2;
+}
+
+[data-theme="dark"] .user-info {
+  background: rgba(160, 196, 242, 0.06);
+  border-color: rgba(160, 196, 242, 0.2);
+}
+
+[data-theme="dark"] .hamburger-btn {
+  color: #A0C4F2;
+}
+[data-theme="dark"] .hamburger-btn:hover {
+  background: rgba(160, 196, 242, 0.1);
+}
+
+/* 다크모드: 로그인 버튼 반투명으로 */
+[data-theme="dark"] .login-btn {
+  background: rgba(109, 167, 242, 0.18);
+  color: #A0C4F2;
+  border: 1.5px solid rgba(109, 167, 242, 0.35);
+}
+[data-theme="dark"] .login-btn:hover {
+  background: rgba(109, 167, 242, 0.28);
+  color: #CEDEF2;
+}
+
 
 .app-shell {
   width: 100%;
@@ -450,18 +557,21 @@ function changeView(view) {
 /* Toast */
 .toast-notification {
   position: fixed;
-  top: 30px;
+  top: 28px;
   left: 50%;
   transform: translateX(-50%);
-  background: #eff6ff;
-  color: #2563eb;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.95);
+  color: #035AA6;
+  padding: 11px 26px;
+  border-radius: var(--radius-pill);
+  font-size: 0.92rem;
   font-weight: 700;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  font-family: 'Outfit', sans-serif;
+  box-shadow: 0 8px 24px rgba(3, 51, 115, 0.15);
+  border: 1px solid rgba(109, 167, 242, 0.35);
   z-index: 2000;
   white-space: nowrap;
+  backdrop-filter: blur(12px);
 }
 
 .toast-enter-active,
@@ -471,6 +581,6 @@ function changeView(view) {
 .toast-enter-from,
 .toast-leave-to {
   opacity: 0;
-  transform: translate(-50%, -20px);
+  transform: translate(-50%, -18px);
 }
 </style>

@@ -97,7 +97,7 @@ function cancelEdit() {
       <span v-if="todo.isDDay && !todo.done" class="todo-dday-badge" :title="todo._dateKey + ' 마감'">
         {{ getDDayText(todo._dateKey) }}
       </span>
-      <span v-if="todo.tag && todo.tag !== '일반' && !todo.done" class="todo-tag-badge" :class="`tag-${todo.tag === '업무' ? 'work' : todo.tag === '개인' ? 'personal' : 'study'}`">
+      <span v-if="todo.tag && todo.tag !== '일반' && !todo.done" class="todo-tag-badge" :class="`tag-${todo.tag === '업무' ? 'work' : 'study'}`">
         {{ todo.tag }}
       </span>
       {{ todo.text }}
@@ -235,9 +235,8 @@ button {
   color: #fff;
 }
 
-.tag-work    { background: #d97706; }
-.tag-personal{ background: #059669; }
-.tag-study   { background: var(--zen-verbena, #B37AD4); }
+.tag-work    { background: #023373; }
+.tag-study   { background: #B37AD4; }
 
 /* ── Order controls ── */
 .order-controls {
@@ -336,10 +335,23 @@ button {
 }
 
 .delete-button {
-  color: var(--btn-delete-text);
-  background: var(--btn-delete-bg);
+  color: #e05252;
+  background: rgba(220, 38, 38, 0.1);
 }
-.delete-button:hover { opacity: 0.78; }
+.delete-button:hover {
+  background: rgba(220, 38, 38, 0.18);
+  opacity: 1;
+}
+
+/* 다크모드: 삭제 버튼 더 은은하게 */
+:root[data-theme="dark"] .delete-button {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.1);
+}
+:root[data-theme="dark"] .delete-button:hover {
+  background: rgba(239, 68, 68, 0.18);
+}
+
 
 @media (max-width: 640px) {
   li {

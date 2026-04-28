@@ -607,7 +607,7 @@ button {
   display: inline-block;
 }
 .dot-일반 { background: var(--zen-blue-300, #6DA7F2); }
-.dot-업무 { background: #d97706; }
+.dot-업무 { background: #023373; }
 .dot-공부 { background: var(--zen-verbena, #B37AD4); }
 
 /* ── Lists & Sections ── */
