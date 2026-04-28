@@ -147,20 +147,26 @@ li {
   grid-template-columns: auto auto 1fr auto;
   gap: 10px;
   align-items: center;
-  padding: 14px;
-  border-radius: 18px;
+  padding: 13px 14px;
+  border-radius: var(--radius-md);
   background: var(--item-bg);
   color: var(--color-heading);
-  transition: background 0.15s, opacity 0.15s, transform 0.15s;
+  border: 1px solid transparent;
+  transition: background 0.18s, opacity 0.18s, transform 0.18s, border-color 0.18s;
+}
+
+li:hover {
+  border-color: var(--panel-border);
 }
 
 li.drag-over {
-  background: #dbeafe;
+  background: rgba(109, 167, 242, 0.14);
+  border-color: var(--zen-blue-300, #6DA7F2);
   transform: scale(1.01);
 }
 
 li.drag-src {
-  opacity: 0.4;
+  opacity: 0.38;
 }
 
 li.done span {
@@ -170,7 +176,7 @@ li.done span {
 
 button {
   border: none;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   font: inherit;
   cursor: pointer;
 }
@@ -185,56 +191,55 @@ button {
 
 .todo-edit-input {
   width: 100%;
-  padding: 6px 10px;
-  border: 1.5px solid #60a5fa;
-  border-radius: 10px;
+  padding: 6px 12px;
+  border: 1.5px solid var(--zen-blue-300, #6DA7F2);
+  border-radius: var(--radius-sm);
   font: inherit;
   font-size: 0.95rem;
   color: var(--color-heading);
   background: var(--input-bg);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18);
+  box-shadow: 0 0 0 3px rgba(109, 167, 242, 0.16);
 }
 
+/* ── Badges ── */
 .todo-date-badge {
-  font-size: 0.65rem;
-  background: #e2e8f0;
-  padding: 2px 6px;
-  border-radius: 6px;
-  color: #475569;
+  font-size: 0.62rem;
+  background: rgba(160, 196, 242, 0.2);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  color: var(--zen-blue-600, #035AA6);
   text-decoration: none !important;
   white-space: nowrap;
+  font-weight: 600;
+  border: 1px solid rgba(160, 196, 242, 0.3);
 }
 
 .todo-dday-badge {
-  font-size: 0.75rem;
-  background: #e0f2fe;
-  color: #0284c7;
-  padding: 2px 8px;
-  border-radius: 8px;
-  font-weight: 800;
+  font-size: 0.72rem;
+  background: rgba(121, 151, 230, 0.18);
+  color: var(--zen-atlantis, #206ABC);
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
   white-space: nowrap;
+  border: 1px solid rgba(121, 151, 230, 0.3);
 }
 
 .todo-tag-badge {
-  font-size: 0.7rem;
-  padding: 3px 8px;
-  border-radius: 8px;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
   font-weight: 700;
   white-space: nowrap;
   color: #fff;
 }
 
-.tag-work {
-  background: #f59e0b; /* orange */
-}
-.tag-personal {
-  background: #10b981; /* emerald */
-}
-.tag-study {
-  background: #8b5cf6; /* violet */
-}
+.tag-work    { background: #d97706; }
+.tag-personal{ background: #059669; }
+.tag-study   { background: var(--zen-verbena, #B37AD4); }
 
+/* ── Order controls ── */
 .order-controls {
   display: flex;
   align-items: center;
@@ -249,10 +254,7 @@ button {
   user-select: none;
   line-height: 1;
 }
-
-.drag-handle:active {
-  cursor: grabbing;
-}
+.drag-handle:active { cursor: grabbing; }
 
 .arrow-buttons {
   display: flex;
@@ -262,95 +264,92 @@ button {
 
 .arrow-button {
   padding: 2px 6px;
-  font-size: 0.65rem;
-  border-radius: 6px;
+  font-size: 0.6rem;
+  border-radius: var(--radius-sm);
   background: var(--arrow-btn-bg);
   color: var(--arrow-btn-text);
   line-height: 1;
-  transition: background 0.1s;
+  transition: background 0.15s;
 }
-
 .arrow-button:hover:not(:disabled) {
-  background: #bfdbfe;
-  color: #1d4ed8;
+  background: rgba(109, 167, 242, 0.25);
+  color: var(--zen-blue-600, #035AA6);
 }
-
 .arrow-button:disabled {
-  opacity: 0.25;
+  opacity: 0.22;
   cursor: not-allowed;
 }
 
+/* ── Toggle button ── */
 .toggle-button {
   min-width: 78px;
-  padding: 10px 12px;
+  padding: 9px 12px;
   background: var(--btn-toggle-bg);
   color: var(--btn-toggle-text);
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  transition: all 0.2s ease;
+  border-radius: var(--radius-pill);
+  transition: all 0.22s ease;
 }
-
 .toggle-button.is-done {
   background: var(--btn-toggle-done-bg);
   color: var(--btn-toggle-done-text);
 }
 
+/* ── Action buttons ── */
 .action-buttons {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .action-btn {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 8px 10px;
-  font-size: 0.82rem;
+  padding: 7px 10px;
+  font-size: 0.8rem;
   font-weight: 700;
-  border-radius: 8px;
-  transition: all 0.15s;
+  border-radius: var(--radius-pill);
+  transition: all 0.18s ease;
   line-height: 1;
+  font-family: inherit;
 }
-
 .action-btn:hover {
   transform: translateY(-1px);
 }
 
 .edit-button {
-  color: #0284c7;
-  background: #e0f2fe;
+  color: var(--zen-atlantis, #206ABC);
+  background: rgba(32, 106, 188, 0.12);
 }
-.edit-button:hover { background: #bae6fd; }
+.edit-button:hover { background: rgba(32, 106, 188, 0.22); }
 
 .flag-button {
-  color: #d97706;
-  background: #fef3c7;
+  color: #c07a00;
+  background: rgba(234, 179, 8, 0.12);
 }
-.flag-button:hover { background: #fde68a; }
-
+.flag-button:hover { background: rgba(234, 179, 8, 0.22); }
 .flag-button.active {
-  color: #b45309;
-  background: #fcd34d;
-  box-shadow: inset 0 0 0 1px #f59e0b;
+  color: #92400e;
+  background: rgba(234, 179, 8, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(234, 179, 8, 0.5);
 }
 
 .delete-button {
   color: var(--btn-delete-text);
   background: var(--btn-delete-bg);
 }
-.delete-button:hover {
-  opacity: 0.8;
-}
+.delete-button:hover { opacity: 0.78; }
 
 @media (max-width: 640px) {
   li {
     grid-template-columns: auto auto 1fr;
-    row-gap: 12px;
+    row-gap: 10px;
   }
   .action-buttons {
     grid-column: 1 / -1;
     justify-content: flex-end;
-    padding-top: 10px;
+    padding-top: 8px;
     border-top: 1px dashed var(--input-border);
   }
 }

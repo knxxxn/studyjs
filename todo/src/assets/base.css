@@ -1,139 +1,170 @@
-/* color palette from <https://github.com/vuejs/theme> */
+/* =====================================================
+   ZEN MINIMALISM — color palette inspired by capture
+   Blues:      #CEDEF2 #A0C4F2 #6DA7F2 #035AA6 #023373
+   Accents:    #CAA9F3 #B37AD4 #7997E6 #206ABC #0E155E
+   ===================================================== */
+
+/* ─── Google Fonts ─── */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
 :root {
+  /* ── Raw palette ── */
+  --zen-blue-50: #CEDEF2;
+  --zen-blue-100: #A0C4F2;
+  --zen-blue-300: #6DA7F2;
+  --zen-blue-600: #035AA6;
+  --zen-blue-900: #023373;
+
+  --zen-phlox: #CAA9F3;
+  --zen-verbena: #B37AD4;
+  --zen-periwinkle: #7997E6;
+  --zen-atlantis: #206ABC;
+  --zen-phthalo: #0E155E;
+
+  /* ── Base neutrals ── */
   --vt-c-white: #ffffff;
-  --vt-c-white-soft: #f8f8f8;
-  --vt-c-white-mute: #f2f2f2;
+  --vt-c-white-soft: #f4f7fb;
+  --vt-c-white-mute: #e8eef8;
 
-  --vt-c-black: #181818;
-  --vt-c-black-soft: #222222;
-  --vt-c-black-mute: #282828;
+  --vt-c-black: #1a1c1e;
+  --vt-c-black-soft: #22252a;
+  --vt-c-black-mute: #2a2e35;
 
-  --vt-c-indigo: #2c3e50;
+  --vt-c-divider-light-1: rgba(3, 90, 166, 0.18);
+  --vt-c-divider-light-2: rgba(3, 90, 166, 0.09);
+  --vt-c-divider-dark-1: rgba(160, 196, 242, 0.22);
+  --vt-c-divider-dark-2: rgba(160, 196, 242, 0.12);
 
-  --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
-  --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
-  --vt-c-divider-dark-1: rgba(84, 84, 84, 0.65);
-  --vt-c-divider-dark-2: rgba(84, 84, 84, 0.48);
-
-  --vt-c-text-light-1: var(--vt-c-indigo);
-  --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
-  --vt-c-text-dark-1: var(--vt-c-white);
-  --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+  --vt-c-text-light-1: #023373;
+  --vt-c-text-light-2: rgba(2, 51, 115, 0.6);
+  --vt-c-text-dark-1: #e8f0fb;
+  --vt-c-text-dark-2: rgba(206, 222, 242, 0.7);
 }
 
-/* semantic color variables for this project */
+/* ── Light mode tokens ── */
 :root {
-  --color-background: var(--vt-c-white);
-  --color-background-soft: var(--vt-c-white-soft);
-  --color-background-mute: var(--vt-c-white-mute);
+  --color-background: var(--vt-c-white-soft);
+  --color-background-soft: var(--vt-c-white-mute);
+  --color-background-mute: #dde7f5;
 
   --color-border: var(--vt-c-divider-light-2);
   --color-border-hover: var(--vt-c-divider-light-1);
 
-  --color-heading: var(--vt-c-text-light-1);
-  --color-text: var(--vt-c-text-light-1);
+  --color-heading: #023373;
+  --color-text: #035AA6;
 
   --section-gap: 160px;
 
-  --panel-bg: rgba(255, 255, 255, 0.95);
-  --panel-border: rgba(148, 163, 184, 0.28);
-  --item-bg: #f8fafc;
-  --item-hover: #f1f5f9;
-  --input-bg: #fff;
-  --input-border: #cbd5e1;
-  --memo-bg: #f8fafc;
-  --shadow-color: rgba(15, 23, 42, 0.08);
-  --text-muted: #64748b;
+  --panel-bg: rgba(255, 255, 255, 0.88);
+  --panel-border: rgba(109, 167, 242, 0.25);
+  --item-bg: #f0f5fd;
+  --item-hover: #e2ecfb;
+  --input-bg: #ffffff;
+  --input-border: #A0C4F2;
+  --memo-bg: #f0f5fd;
+  --shadow-color: rgba(3, 51, 115, 0.08);
+  --text-muted: #6DA7F2;
 
-  --btn-toggle-bg: #dbeafe;
-  --btn-toggle-text: #1d4ed8;
-  --btn-toggle-done-bg: #dcfce7;
-  --btn-toggle-done-text: #16a34a;
-  --btn-delete-bg: #fee2e2;
-  --btn-delete-text: #dc2626;
+  /* ── Action button tokens ── */
+  --btn-toggle-bg: rgba(121, 151, 230, 0.15);
+  --btn-toggle-text: #035AA6;
+  --btn-toggle-done-bg: rgba(32, 106, 188, 0.12);
+  --btn-toggle-done-text: #206ABC;
+  --btn-delete-bg: rgba(179, 122, 212, 0.15);
+  --btn-delete-text: #B37AD4;
 
-  --title-overdue: #dc2626;
-  --title-today: #2563eb;
-  --title-done: #64748b;
-  --drag-handle: #94a3b8;
-  --arrow-btn-bg: #e2e8f0;
-  --arrow-btn-text: #475569;
+  --title-overdue: #B37AD4;
+  --title-today: #035AA6;
+  --title-done: #A0C4F2;
+  --drag-handle: #A0C4F2;
+  --arrow-btn-bg: #e2ecfb;
+  --arrow-btn-text: #6DA7F2;
+
+  /* ── Border radius (zen rounding) ── */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
 }
 
+/* ── Dark mode (prefers) ── */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-background: var(--vt-c-black);
-    --color-background-soft: var(--vt-c-black-soft);
-    --color-background-mute: var(--vt-c-black-mute);
+    --color-background:      #0e1117;
+    --color-background-soft: #141820;
+    --color-background-mute: #1a2030;
 
-    --color-border: var(--vt-c-divider-dark-2);
+    --color-border:       var(--vt-c-divider-dark-2);
     --color-border-hover: var(--vt-c-divider-dark-1);
 
-    --color-heading: #ffffff;
-    --color-text: rgba(241, 245, 249, 0.85); /* 더 밝은 텍스트 */
+    --color-heading: #e8f0fb;
+    --color-text:    rgba(206, 222, 242, 0.88);
 
-    --panel-bg: rgba(30, 41, 59, 0.85); /* slate-800 */
-    --panel-border: rgba(51, 65, 85, 0.4);
-    --item-bg: #1e293b; /* slate-800 */
-    --item-hover: #334155; /* slate-700 */
-    --input-bg: rgba(30, 41, 59, 0.6);
-    --input-border: #475569;
-    --memo-bg: #1e293b;
-    --shadow-color: rgba(0, 0, 0, 0.4);
-    --text-muted: #cbd5e1; /* 더 밝은 muted 색상 */
+    --panel-bg:     #1c2540;
+    --panel-border: rgba(109, 167, 242, 0.28);
+    --item-bg:      #182035;
+    --item-hover:   #213050;
+    --input-bg:     rgba(15, 22, 40, 0.85);
+    --input-border: #2a3f68;
+    --memo-bg:      #182035;
+    --shadow-color: rgba(0, 0, 0, 0.55);
+    --text-muted:   #7997E6;
 
-    --btn-toggle-bg: rgba(59, 130, 246, 0.2);
-    --btn-toggle-text: #93c5fd; /* 더 밝은 파란색 */
-    --btn-toggle-done-bg: rgba(34, 197, 94, 0.2);
-    --btn-toggle-done-text: #86efac; /* 더 밝은 초록색 */
-    --btn-delete-bg: rgba(239, 68, 68, 0.2);
-    --btn-delete-text: #fca5a5;
+    --btn-toggle-bg:        rgba(121, 151, 230, 0.18);
+    --btn-toggle-text:      #A0C4F2;
+    --btn-toggle-done-bg:   rgba(32, 106, 188, 0.18);
+    --btn-toggle-done-text: #6DA7F2;
+    --btn-delete-bg:        rgba(179, 122, 212, 0.18);
+    --btn-delete-text:      #CAA9F3;
 
-    --title-overdue: #f87171;
-    --title-today: #60a5fa;
-    --title-done: #94a3b8;
-    --drag-handle: #cbd5e1;
-    --arrow-btn-bg: rgba(241, 245, 249, 0.1);
-    --arrow-btn-text: #cbd5e1;
+    --title-overdue:  #CAA9F3;
+    --title-today:    #6DA7F2;
+    --title-done:     #2a3f68;
+    --drag-handle:    #7997E6;
+    --arrow-btn-bg:   rgba(160, 196, 242, 0.1);
+    --arrow-btn-text: #A0C4F2;
   }
 }
 
+/* ── Dark mode (manual) ── */
 :root[data-theme="dark"] {
-  --color-background: var(--vt-c-black);
-  --color-background-soft: var(--vt-c-black-soft);
-  --color-background-mute: var(--vt-c-black-mute);
+  --color-background:      #0e1117;
+  --color-background-soft: #141820;
+  --color-background-mute: #1a2030;
 
-  --color-border: var(--vt-c-divider-dark-2);
+  --color-border:       var(--vt-c-divider-dark-2);
   --color-border-hover: var(--vt-c-divider-dark-1);
 
-  --color-heading: #ffffff;
-  --color-text: rgba(241, 245, 249, 0.85);
+  --color-heading: #e8f0fb;
+  --color-text:    rgba(206, 222, 242, 0.88);
 
-  --panel-bg: rgba(30, 41, 59, 0.85);
-  --panel-border: rgba(51, 65, 85, 0.4);
-  --item-bg: #1e293b;
-  --item-hover: #334155;
-  --input-bg: rgba(30, 41, 59, 0.6);
-  --input-border: #475569;
-  --memo-bg: #1e293b;
-  --shadow-color: rgba(0, 0, 0, 0.4);
-  --text-muted: #cbd5e1;
+  --panel-bg:     #1c2540;
+  --panel-border: rgba(109, 167, 242, 0.28);
+  --item-bg:      #182035;
+  --item-hover:   #213050;
+  --input-bg:     rgba(15, 22, 40, 0.85);
+  --input-border: #2a3f68;
+  --memo-bg:      #182035;
+  --shadow-color: rgba(0, 0, 0, 0.55);
+  --text-muted:   #7997E6;
 
-  --btn-toggle-bg: rgba(59, 130, 246, 0.2);
-  --btn-toggle-text: #93c5fd;
-  --btn-toggle-done-bg: rgba(34, 197, 94, 0.2);
-  --btn-toggle-done-text: #86efac;
-  --btn-delete-bg: rgba(239, 68, 68, 0.2);
-  --btn-delete-text: #fca5a5;
+  --btn-toggle-bg:        rgba(121, 151, 230, 0.18);
+  --btn-toggle-text:      #A0C4F2;
+  --btn-toggle-done-bg:   rgba(32, 106, 188, 0.18);
+  --btn-toggle-done-text: #6DA7F2;
+  --btn-delete-bg:        rgba(179, 122, 212, 0.18);
+  --btn-delete-text:      #CAA9F3;
 
-  --title-overdue: #f87171;
-  --title-today: #60a5fa;
-  --title-done: #94a3b8;
-  --drag-handle: #cbd5e1;
-  --arrow-btn-bg: rgba(241, 245, 249, 0.1);
-  --arrow-btn-text: #cbd5e1;
+  --title-overdue:  #CAA9F3;
+  --title-today:    #6DA7F2;
+  --title-done:     #2a3f68;
+  --drag-handle:    #7997E6;
+  --arrow-btn-bg:   rgba(160, 196, 242, 0.1);
+  --arrow-btn-text: #A0C4F2;
 }
 
+/* ─── Reset ─── */
 *,
 *::before,
 *::after {
@@ -142,89 +173,80 @@
   font-weight: normal;
 }
 
+/* ─── Body ─── */
 body {
   min-height: 100vh;
   color: var(--color-text);
   background: var(--color-background);
-  transition:
-    color 0.5s,
-    background-color 0.5s;
-  line-height: 1.6;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
-    sans-serif;
+  transition: color 0.4s, background-color 0.4s;
+  line-height: 1.65;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 15px;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Common Panel Style */
+/* ─── Layout ─── */
 .layout-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  gap: 24px;
+  gap: 20px;
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
   box-sizing: border-box;
 }
 
+/* ─── Panel (card) ─── */
 .panel {
   display: flex;
   flex-direction: column;
-  padding: 24px;
+  padding: 28px;
   border: 1px solid var(--panel-border);
-  border-radius: 24px;
+  border-radius: var(--radius-xl);
+  /* 28px — key zen rounding */
   background: var(--panel-bg);
-  box-shadow: 0 10px 40px var(--shadow-color);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    0 2px 8px var(--shadow-color),
+    0 12px 32px rgba(3, 51, 115, 0.05);
   color: var(--color-text);
   box-sizing: border-box;
-  min-width: 0; /* 내부 가로 스크롤 요소로 인해 너비가 늘어나는 것 방지 */
+  min-width: 0;
+  transition: box-shadow 0.3s ease;
 }
 
+/* ─── Gradient text → flat solid ─── */
 .gradient-text {
-  background: linear-gradient(135deg, #1d4ed8 40%, #0284c7);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--zen-blue-600);
   display: inline-block;
 }
 
-/* Dashboard Unified Layout */
+/* ─── Dashboard Unified Layout ─── */
 @media (min-width: 860px) {
   .dashboard-unified {
     gap: 0 !important;
   }
 
   .dashboard-unified .sidebar {
-    border-radius: 24px 0 0 24px !important;
+    border-radius: var(--radius-xl) 0 0 var(--radius-xl) !important;
     border-right: none !important;
   }
 
   .dashboard-unified .app-shell .panel {
-    border-radius: 0 !important; /* 기본적으로 모든 패널 직각 */
+    border-radius: 0 !important;
     box-shadow: none !important;
     height: 100% !important;
     overflow-y: auto !important;
     scrollbar-width: thin;
-    scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+    scrollbar-color: rgba(109, 167, 242, 0.3) transparent;
   }
 
-  /* 날씨나 뉴스 패널이 대시보드의 가장 오른쪽에 올 때 (우선순위 상향) */
   .dashboard-unified .app-shell .weather-panel,
   .dashboard-unified .app-shell .news-panel {
-    border-radius: 0 24px 24px 0 !important;
+    border-radius: 0 var(--radius-xl) var(--radius-xl) 0 !important;
   }
 }

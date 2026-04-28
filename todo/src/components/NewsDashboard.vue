@@ -90,7 +90,7 @@ const renderedSummary = computed(() => {
 
 @media (min-width: 860px) {
   .news-panel {
-    padding-left: 30px; /* 사이드바와 입력창 사이의 간격 확보 */
+    padding-left: 28px;
   }
 }
 
@@ -99,11 +99,7 @@ const renderedSummary = computed(() => {
   align-items: center;
   gap: 12px;
   margin-top: 10px;
-  margin-bottom: 20px; /* 제목과 소제목 사이 간격을 더 넓게 */
-}
-
-.header-emoji {
-  font-size: 2.2rem;
+  margin-bottom: 16px;
 }
 
 .gradient-text {
@@ -111,15 +107,17 @@ const renderedSummary = computed(() => {
   font-weight: 800;
   margin: 0;
   line-height: 1.1;
+  letter-spacing: -0.5px;
 }
 
 .subtitle {
-  color: var(--color-text-mute);
-  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
   font-weight: 500;
   text-indent: 0.5em;
   margin-top: 0;
-  margin-bottom: 12px; /* 소제목과 입력창 사이 간격은 좁게 */
+  margin-bottom: 10px;
+  letter-spacing: 0.03em;
 }
 
 .search-box {
@@ -130,76 +128,92 @@ const renderedSummary = computed(() => {
 .search-input {
   flex: 1;
   min-width: 0;
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--color-border);
-  background: var(--color-background-soft);
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--input-border);
+  background: var(--input-bg);
   color: var(--color-text);
-  font-size: 1rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.22s ease;
 }
 
 .search-input:focus {
-  outline: 2px solid #6366f1;
-  border-color: transparent;
+  outline: none;
+  border-color: var(--zen-blue-300, #6DA7F2);
+  box-shadow: 0 0 0 3px rgba(109, 167, 242, 0.18);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
 }
 
 .btn {
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 12px 22px;
+  border-radius: var(--radius-pill);
   border: none;
-  font-weight: 600;
+  font-weight: 700;
+  font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s ease;
   white-space: nowrap;
   flex-shrink: 0;
+  letter-spacing: 0.02em;
 }
 
 .btn-primary {
-  background: #6366f1;
+  background: var(--zen-blue-600, #035AA6);
   color: white;
+  box-shadow: 0 4px 14px rgba(3, 90, 166, 0.22);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #4f46e5;
+  opacity: 0.9;
+  box-shadow: 0 6px 18px rgba(3, 90, 166, 0.32);
 }
 
 .btn-primary:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .error-msg {
-  padding: 12px;
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border-radius: 8px;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 12px 16px;
+  background: rgba(179, 122, 212, 0.1);
+  color: var(--zen-verbena, #B37AD4);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(179, 122, 212, 0.25);
+  font-size: 0.9rem;
 }
 
 .news-content {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 22px;
 }
 
 .summary-box {
-  background: var(--color-background-soft);
+  background: var(--item-bg);
   padding: 20px;
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--panel-border);
 }
 
 .summary-box h3 {
-  margin: 0 0 16px 0;
-  color: #8b5cf6;
+  margin: 0 0 14px 0;
+  color: var(--zen-periwinkle, #7997E6);
   display: flex;
   align-items: center;
   gap: 8px;
+  font-weight: 700;
+  font-size: 1rem;
 }
 
 .summary-text {
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--color-text);
+  font-size: 0.95rem;
 }
 
 .summary-text :deep(strong) {
@@ -219,13 +233,15 @@ const renderedSummary = computed(() => {
 }
 
 .news-list-box {
-  padding: 0 10px;
+  padding: 0 6px;
 }
 
 .news-list-box h3 {
   margin: 0 0 12px 0;
-  font-size: 1.1rem;
+  font-size: 0.98rem;
+  font-weight: 700;
   color: var(--color-heading);
+  letter-spacing: 0.02em;
 }
 
 .news-list {
@@ -234,18 +250,19 @@ const renderedSummary = computed(() => {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .news-list li a {
-  color: var(--color-text);
+  color: var(--text-muted);
   text-decoration: none;
-  line-height: 1.4;
+  line-height: 1.45;
   display: block;
   transition: color 0.2s ease;
+  font-size: 0.9rem;
 }
 
 .news-list li a:hover {
-  color: #6366f1;
+  color: var(--zen-blue-600, #035AA6);
 }
 </style>

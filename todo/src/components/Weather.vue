@@ -59,6 +59,19 @@ const weatherEffectClass = computed(() => {
   return ''
 })
 
+// 날씨 조건 + 시간대 결합 배경
+const weatherCardClass = computed(() => {
+  const c = weatherData.value.condition
+  const isDay = timeOfDayClass.value === 'theme-day'
+  if (c === '맑음' || c === '구름조금') return isDay ? 'wx-sunny-day' : 'wx-sunny-night'
+  if (c === '구름많음') return isDay ? 'wx-partcloud-day' : 'wx-partcloud-night'
+  if (c === '흐림') return isDay ? 'wx-cloudy-day' : 'wx-cloudy-night'
+  if (c === '비' || c === '소나기') return isDay ? 'wx-rain-day' : 'wx-rain-night'
+  if (c === '비/눈') return 'wx-sleet'
+  if (c === '눈') return isDay ? 'wx-snow-day' : 'wx-snow-night'
+  return isDay ? 'wx-default-day' : 'wx-default-night'
+})
+
 const particleContainer = ref(null)
 let particleTimer = null
 
@@ -205,7 +218,7 @@ onUnmounted(() => {
     </div>
 
     <!-- 1. 메인 (초단기) 날씨 영역 -->
-    <section class="weather-card" :class="[timeOfDayClass, weatherEffectClass]">
+    <section class="weather-card" :class="[weatherCardClass, weatherEffectClass]">
       <!-- JS Particle Animation Container -->
       <div ref="particleContainer" class="particle-container" v-show="weatherEffectClass === 'effect-rain' || weatherEffectClass === 'effect-snow'"></div>
 
@@ -353,7 +366,7 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 14px;
   background:
-    radial-gradient(circle at top right, rgba(125, 211, 252, 0.28), transparent 28%),
+    radial-gradient(circle at top right, rgba(109, 167, 242, 0.18), transparent 30%),
     var(--panel-bg);
 }
 
@@ -371,23 +384,25 @@ onUnmounted(() => {
 }
 
 .region-button {
-  padding: 8px 14px;
-  border-radius: 12px;
+  padding: 7px 16px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--panel-border);
   background: var(--input-bg);
   color: var(--color-heading);
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 4px;
-  box-shadow: 0 2px 5px var(--shadow-color);
-  transition: all 0.2s;
+  box-shadow: 0 2px 6px var(--shadow-color);
+  transition: all 0.22s ease;
+  font-family: inherit;
 }
 
 .region-button:hover {
   background: var(--item-hover);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 /* 날씨 에러 UI */
@@ -445,13 +460,14 @@ onUnmounted(() => {
 
 .region-item {
   padding: 10px 0;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--input-border);
   background: var(--input-bg);
   color: var(--color-text);
-  font-weight: 700;
+  font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.22s ease;
 }
 
 .region-item:hover {
@@ -459,9 +475,10 @@ onUnmounted(() => {
 }
 
 .region-item.active {
-  background: #3b82f6;
+  background: var(--zen-blue-600, #035AA6);
   color: #fff;
-  border-color: #2563eb;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(3, 90, 166, 0.25);
 }
 
 .gradient-text {
@@ -469,6 +486,7 @@ onUnmounted(() => {
   font-weight: 800;
   margin: 0;
   line-height: 1.1;
+  letter-spacing: -0.5px;
 }
 
 .weather-icon {
@@ -478,37 +496,134 @@ onUnmounted(() => {
 .weather-card {
   margin-top: 6px;
   padding: 22px;
-  border-radius: 22px;
+  border-radius: var(--radius-lg);
   transition: all 0.5s ease;
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
 }
 
-/* 밤 테마 (어두움) */
-.weather-card.theme-night {
-  color: #eff6ff;
-  background: linear-gradient(135deg, #0f172a, #0369a1);
+/* ── 날씨 조건별 배경 (낮) ── */
+/* 맑음 낮 — 따뜻한 하늘 */
+.weather-card.wx-sunny-day {
+  color: #1a3a00;
+  background: linear-gradient(150deg, #87CEEB, #FFD166, #FFB347);
+  box-shadow: inset 0 2px 14px rgba(255, 255, 255, 0.4);
 }
+.weather-card.wx-sunny-day .condition,
+.weather-card.wx-sunny-day .weather-summary,
+.weather-card.wx-sunny-day .fetched-at { color: rgba(30, 60, 0, 0.68); }
 
-.weather-card.theme-night .condition,
-.weather-card.theme-night .weather-summary,
-.weather-card.theme-night .fetched-at {
-  color: rgba(239, 246, 255, 0.84);
+/* 구름조금 낮 */
+.weather-card.wx-partcloud-day {
+  color: #023373;
+  background: linear-gradient(135deg, #CEDEF2, #A0C4F2, #6DA7F2);
+  box-shadow: inset 0 2px 12px rgba(255, 255, 255, 0.4);
 }
+.weather-card.wx-partcloud-day .condition,
+.weather-card.wx-partcloud-day .weather-summary,
+.weather-card.wx-partcloud-day .fetched-at { color: rgba(2, 51, 115, 0.7); }
 
-/* 낮 테마 (밝음) */
-.weather-card.theme-day {
-  color: #0f172a;
-  background: linear-gradient(135deg, #e0f2fe, #7dd3fc);
-  box-shadow: inset 0 2px 10px rgba(255, 255, 255, 0.5);
+/* 흐림 낮 */
+.weather-card.wx-cloudy-day {
+  color: #1e2d3d;
+  background: linear-gradient(135deg, #8FA8C0, #7090A8, #5A7A94);
 }
+.weather-card.wx-cloudy-day .condition,
+.weather-card.wx-cloudy-day .weather-summary,
+.weather-card.wx-cloudy-day .fetched-at { color: rgba(30, 45, 61, 0.7); }
 
-.weather-card.theme-day .condition,
-.weather-card.theme-day .weather-summary,
-.weather-card.theme-day .fetched-at {
-  color: rgba(15, 23, 42, 0.75);
+/* 비 낮 */
+.weather-card.wx-rain-day {
+  color: #e8f0fb;
+  background: linear-gradient(135deg, #3A5F8A, #2C4A72, #1E3558);
 }
+.weather-card.wx-rain-day .condition,
+.weather-card.wx-rain-day .weather-summary,
+.weather-card.wx-rain-day .fetched-at { color: rgba(206, 222, 242, 0.78); }
+
+/* 눈 낮 */
+.weather-card.wx-snow-day {
+  color: #0a2040;
+  background: linear-gradient(135deg, #D6EAF8, #BDD7EE, #A3C4E4);
+  box-shadow: inset 0 2px 12px rgba(255, 255, 255, 0.5);
+}
+.weather-card.wx-snow-day .condition,
+.weather-card.wx-snow-day .weather-summary,
+.weather-card.wx-snow-day .fetched-at { color: rgba(10, 32, 64, 0.65); }
+
+/* ── 날씨 조건별 배경 (밤) ── */
+/* 맑음 밤 — 깊은 자주빛 하늘 */
+.weather-card.wx-sunny-night {
+  color: #f0e8ff;
+  background: linear-gradient(135deg, #0D0820, #1C0D4A, #2D1070);
+}
+.weather-card.wx-sunny-night .condition,
+.weather-card.wx-sunny-night .weather-summary,
+.weather-card.wx-sunny-night .fetched-at { color: rgba(224, 210, 255, 0.75); }
+
+/* 구름많음 밤 */
+.weather-card.wx-partcloud-night {
+  color: #e8f0fb;
+  background: linear-gradient(135deg, #0E155E, #023373, #035AA6);
+}
+.weather-card.wx-partcloud-night .condition,
+.weather-card.wx-partcloud-night .weather-summary,
+.weather-card.wx-partcloud-night .fetched-at { color: rgba(206, 222, 242, 0.78); }
+
+/* 흐림 밤 */
+.weather-card.wx-cloudy-night {
+  color: #c8d8e8;
+  background: linear-gradient(135deg, #1C2535, #243345, #2C3F55);
+}
+.weather-card.wx-cloudy-night .condition,
+.weather-card.wx-cloudy-night .weather-summary,
+.weather-card.wx-cloudy-night .fetched-at { color: rgba(200, 216, 232, 0.72); }
+
+/* 비 밤 */
+.weather-card.wx-rain-night {
+  color: #b0c8e0;
+  background: linear-gradient(135deg, #0A1628, #10243E, #162E50);
+}
+.weather-card.wx-rain-night .condition,
+.weather-card.wx-rain-night .weather-summary,
+.weather-card.wx-rain-night .fetched-at { color: rgba(176, 200, 224, 0.72); }
+
+/* 눈 밤 */
+.weather-card.wx-snow-night {
+  color: #c8dff0;
+  background: linear-gradient(135deg, #141F35, #1A2A4A, #203360);
+}
+.weather-card.wx-snow-night .condition,
+.weather-card.wx-snow-night .weather-summary,
+.weather-card.wx-snow-night .fetched-at { color: rgba(200, 223, 240, 0.72); }
+
+/* 진눈깨비 */
+.weather-card.wx-sleet {
+  color: #d0dff0;
+  background: linear-gradient(135deg, #3A5070, #4A6080, #56708A);
+}
+.weather-card.wx-sleet .condition,
+.weather-card.wx-sleet .weather-summary,
+.weather-card.wx-sleet .fetched-at { color: rgba(208, 223, 240, 0.75); }
+
+/* 기본 (데이터 없을 때) */
+.weather-card.wx-default-day {
+  color: #023373;
+  background: linear-gradient(135deg, #CEDEF2, #A0C4F2, #6DA7F2);
+}
+.weather-card.wx-default-day .condition,
+.weather-card.wx-default-day .weather-summary,
+.weather-card.wx-default-day .fetched-at { color: rgba(2, 51, 115, 0.7); }
+
+.weather-card.wx-default-night {
+  color: #e8f0fb;
+  background: linear-gradient(135deg, #0E155E, #023373, #035AA6);
+}
+.weather-card.wx-default-night .condition,
+.weather-card.wx-default-night .weather-summary,
+.weather-card.wx-default-night .fetched-at { color: rgba(206, 222, 242, 0.8); }
+
 
 /* z-index to bring text above animations */
 .weather-main, .weather-summary, .fetched-at {
@@ -606,30 +721,31 @@ onUnmounted(() => {
 /* 단기예보 리스트 스타일 */
 .forecast-section {
   padding: 18px;
-  border-radius: 22px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--panel-border);
   background: var(--item-bg);
   flex-shrink: 0;
 }
 
 .forecast-title {
-  font-size: 0.95rem;
-  font-weight: 800;
+  font-size: 0.9rem;
+  font-weight: 700;
   color: var(--color-heading);
   margin-bottom: 12px;
+  letter-spacing: 0.04em;
 }
 
 .forecast-list {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   overflow-x: auto;
   padding-bottom: 8px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+  scrollbar-color: rgba(109, 167, 242, 0.3) transparent;
 }
 
 .forecast-list::-webkit-scrollbar {
-  height: 6px;
+  height: 5px;
 }
 
 .forecast-list::-webkit-scrollbar-track {
@@ -637,7 +753,7 @@ onUnmounted(() => {
 }
 
 .forecast-list::-webkit-scrollbar-thumb {
-  background-color: rgba(148, 163, 184, 0.4);
+  background-color: rgba(109, 167, 242, 0.35);
   border-radius: 10px;
 }
 
@@ -647,12 +763,12 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 60px;
+  min-width: 58px;
   padding: 12px 0;
   background: var(--input-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 16px;
-  box-shadow: 0 4px 12px var(--shadow-color);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .forecast-item .time {
@@ -692,7 +808,7 @@ onUnmounted(() => {
 .calendar-section {
   margin-top: auto;
   padding: 18px;
-  border-radius: 22px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--panel-border);
   background: var(--item-bg);
 }
@@ -723,19 +839,20 @@ onUnmounted(() => {
 
 .calendar-control {
   border: none;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   font: inherit;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
+  font-family: inherit;
 }
 
 .calendar-nav,
 .calendar-today {
-  padding: 10px 12px;
+  padding: 9px 12px;
   color: var(--color-text);
   background: var(--input-bg);
   box-shadow: inset 0 0 0 1px var(--panel-border);
-  transition: all 0.2s ease;
+  transition: all 0.22s ease;
 }
 
 .calendar-nav:hover,
@@ -744,27 +861,28 @@ onUnmounted(() => {
 }
 
 .calendar-nav {
-  min-width: 42px;
+  min-width: 40px;
 }
 
 .selected-date {
   margin-top: 14px;
-  font-size: 0.92rem;
-  font-weight: 600;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
 .calendar-weekdays,
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
   width: 100%;
 }
 
 .calendar-weekdays {
-  margin-top: 16px;
-  color: #64748b;
-  font-size: 0.86rem;
+  margin-top: 14px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
   text-align: center;
 }
 
@@ -772,12 +890,12 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 24px;
-  font-weight: 700;
+  min-height: 22px;
+  font-weight: 600;
 }
 
 .calendar-grid {
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .calendar-day {
@@ -788,15 +906,16 @@ onUnmounted(() => {
   align-items: center;
   min-width: 0;
   padding: 0;
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   color: var(--color-text);
   background: var(--input-bg);
   box-shadow: inset 0 0 0 1px var(--panel-border);
-  transition: all 0.2s ease;
+  transition: all 0.22s ease;
 }
 
 .calendar-day:hover {
   background: var(--item-hover);
+  transform: scale(1.04);
 }
 
 .calendar-day.muted {
@@ -805,12 +924,14 @@ onUnmounted(() => {
 }
 
 .calendar-day.today {
-  box-shadow: inset 0 0 0 2px #38bdf8;
+  box-shadow: inset 0 0 0 2px var(--zen-blue-300, #6DA7F2);
 }
 
 .calendar-day.selected {
-  color: #eff6ff;
-  background: linear-gradient(135deg, #0284c7, #2563eb);
+  color: #e8f0fb;
+  background: linear-gradient(135deg, var(--zen-blue-600, #035AA6), var(--zen-periwinkle, #7997E6));
+  box-shadow: 0 4px 12px rgba(3, 90, 166, 0.3);
+  transform: scale(1.06);
 }
 
 /* 달력 할 일 점 표시기 */
@@ -872,30 +993,31 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border: none;
-  border-radius: 12px;
-  background: #eff6ff;
-  color: #1d4ed8;
-  font-size: 0.85rem;
-  font-weight: 800;
+  border-radius: var(--radius-pill);
+  background: rgba(109, 167, 242, 0.15);
+  color: var(--zen-blue-600, #035AA6);
+  font-size: 0.82rem;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.4);
-  transition: all 0.2s ease;
+  box-shadow: inset 0 0 0 1px rgba(109, 167, 242, 0.35);
+  transition: all 0.22s ease;
+  font-family: inherit;
 }
 
 .dday-badge:hover {
-  background: #dbeafe;
+  background: rgba(109, 167, 242, 0.25);
 }
 
 .dday-name {
-  color: #3b82f6;
+  color: var(--zen-periwinkle, #7997E6);
   font-weight: 700;
 }
 
 .dday-empty {
-  color: #64748b;
-  font-weight: 600;
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
 .modal-overlay {
@@ -911,53 +1033,57 @@ onUnmounted(() => {
 
 .modal-content {
   background: var(--panel-bg);
-  border-radius: 20px;
-  padding: 24px;
+  border-radius: var(--radius-xl);
+  padding: 26px;
   width: 90%;
   max-width: 320px;
-  box-shadow: 0 20px 40px var(--shadow-color);
+  box-shadow: 0 20px 48px var(--shadow-color);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--panel-border);
 }
 
 .modal-content h3 {
   margin: 0 0 20px 0;
   color: var(--color-heading);
+  font-weight: 700;
 }
 
 .modal-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .modal-form label {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #475569;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted);
 }
 
 .modal-form input {
-  padding: 12px;
-  border: 1px solid var(--input-border);
-  border-radius: 12px;
+  padding: 11px 14px;
+  border: 1.5px solid var(--input-border);
+  border-radius: var(--radius-md);
   background: var(--input-bg);
   font: inherit;
   color: var(--color-text);
+  transition: all 0.22s ease;
 }
 
 .modal-form input:focus {
-  outline: 2px solid rgba(59, 130, 246, 0.3);
-  border-color: #60a5fa;
-  background: #fff;
+  outline: none;
+  border-color: var(--zen-blue-300, #6DA7F2);
+  box-shadow: 0 0 0 3px rgba(109, 167, 242, 0.16);
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 24px;
+  margin-top: 22px;
 }
 
 .modal-actions:has(.btn-clear) {
@@ -970,18 +1096,20 @@ onUnmounted(() => {
 }
 
 .btn-clear, .btn-cancel, .btn-save {
-  padding: 10px 14px;
+  padding: 9px 16px;
   border: none;
-  border-radius: 10px;
-  font-weight: 700;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.22s ease;
+  font-size: 0.9rem;
 }
 
-.btn-clear { background: #fee2e2; color: #dc2626; }
-.btn-clear:hover { background: #fca5a5; }
-.btn-cancel { background: #e2e8f0; color: #475569; }
-.btn-cancel:hover { background: #cbd5e1; }
-.btn-save { background: #3b82f6; color: #fff; }
-.btn-save:hover { background: #2563eb; }
+.btn-clear  { background: rgba(179, 122, 212, 0.15); color: var(--zen-verbena, #B37AD4); }
+.btn-clear:hover  { background: rgba(179, 122, 212, 0.28); }
+.btn-cancel { background: var(--item-bg); color: var(--text-muted); }
+.btn-cancel:hover { background: var(--item-hover); }
+.btn-save   { background: var(--zen-blue-600, #035AA6); color: #fff; box-shadow: 0 4px 12px rgba(3,90,166,0.22); }
+.btn-save:hover   { background: var(--zen-blue-900, #023373); }
 </style>

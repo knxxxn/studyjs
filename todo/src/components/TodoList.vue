@@ -8,6 +8,16 @@ const todoInputRef = ref(null)
 const tags = ['일반', '업무', '공부']
 const selectedTag = ref('일반')
 const filterTag = ref('all')
+const tagDropOpen = ref(false)
+
+// 커스텀 드롭다운 토글 (외부 클릭 시 자동 닫힘)
+function openTagDrop() {
+  tagDropOpen.value = !tagDropOpen.value
+  if (tagDropOpen.value) {
+    const close = () => { tagDropOpen.value = false; document.removeEventListener('click', close) }
+    setTimeout(() => document.addEventListener('click', close), 0)
+  }
+}
 
 // Toast system
 const toastMsg = ref('')
@@ -227,9 +237,22 @@ function clearDragState() {
 
     <!-- Input Form -->
     <form class="todo-form" @submit.prevent="addTodo">
-      <select v-model="selectedTag" class="tag-select" title="카테고리 선택">
-        <option v-for="tag in tags" :key="tag" :value="tag">{{ tag }}</option>
-      </select>
+      <!-- 커스텀 태그 셀렉터 -->
+      <div class="tag-selector" @click.stop>
+        <button type="button" class="tag-selector-btn" @click="openTagDrop">
+          <span class="tag-dot" :class="`dot-${selectedTag}`"></span>
+          {{ selectedTag }}
+          <svg class="tag-chevron" :class="{ rotated: tagDropOpen }" viewBox="0 0 20 20" fill="currentColor" width="13" height="13"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+        <div v-if="tagDropOpen" class="tag-dropdown">
+          <button v-for="tag in tags" :key="tag" type="button"
+            class="tag-option" :class="{ active: selectedTag === tag }"
+            @click="selectedTag = tag; tagDropOpen = false">
+            <span class="tag-dot" :class="`dot-${tag}`"></span>
+            {{ tag }}
+          </button>
+        </div>
+      </div>
       <input 
         ref="todoInputRef"
         v-model="todoInput" 
@@ -356,6 +379,7 @@ function clearDragState() {
 
 <style scoped>
 
+/* ── Panel layout ── */
 .scrollable-panel {
   display: flex;
   flex-direction: column;
@@ -373,276 +397,377 @@ function clearDragState() {
   font-weight: 800;
   margin: 0;
   line-height: 1.1;
+  letter-spacing: -0.5px;
 }
 
+/* ── Badge ── */
 .badge {
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: #dbeafe;
-  color: #1d4ed8;
-  font-size: 0.95rem;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  background: rgba(109, 167, 242, 0.18);
+  color: var(--zen-blue-600, #035AA6);
+  font-size: 0.92rem;
   font-weight: 700;
-  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(109, 167, 242, 0.35);
+  letter-spacing: 0.02em;
 }
 
 .date-subtitle {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: var(--text-muted);
   margin-top: 4px;
-  font-weight: 700;
+  font-weight: 500;
+  letter-spacing: 0.04em;
 }
 
-/* Filters */
+/* ── Filters ── */
 .filter-group {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 .filter-chip {
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 7px 18px;
+  border-radius: var(--radius-pill);
   border: 1.5px solid var(--input-border);
   background: transparent;
   color: var(--text-muted);
-  font-size: 0.9rem;
-  font-weight: 800;
+  font-size: 0.88rem;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s;
+  transition: all 0.22s ease;
   line-height: 1.2;
+  font-family: inherit;
 }
 .filter-chip:hover {
   background: var(--item-hover);
   color: var(--color-heading);
+  border-color: var(--input-border);
 }
 .filter-chip.active {
-  background: #3b82f6;
+  background: var(--zen-blue-600, #035AA6);
   color: #fff;
-  border-color: #2563eb;
-  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(3, 90, 166, 0.28);
 }
 
-/* Input Form */
+/* ── Input Form ── */
 .todo-form {
   display: flex;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 input {
   flex: 1;
-  padding: 14px 16px;
+  padding: 13px 18px;
   border: 1.5px solid var(--input-border);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   font: inherit;
-  font-size: 1rem;
+  font-size: 0.97rem;
   color: var(--color-heading);
   background: var(--input-bg);
-  transition: all 0.2s;
+  transition: all 0.22s ease;
 }
 
 input::placeholder {
-  color: #94a3b8;
+  color: var(--text-muted);
+  opacity: 0.7;
 }
 
 .tag-select {
-  padding: 14px 12px;
+  padding: 13px 12px;
   border: 1.5px solid var(--input-border);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   font: inherit;
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 0.92rem;
+  font-weight: 600;
   color: var(--color-heading);
   background: var(--input-bg);
-  transition: all 0.2s;
+  transition: all 0.22s ease;
   cursor: pointer;
   outline: none;
 }
 
 .tag-select:focus, input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: var(--zen-blue-300, #6DA7F2);
+  box-shadow: 0 0 0 3px rgba(109, 167, 242, 0.18);
   outline: none;
 }
 
 button {
   border: none;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   font: inherit;
   cursor: pointer;
 }
 
+/* ── Primary button ── */
 .btn-primary {
-  padding: 14px 22px;
-  font-size: 1rem;
-  font-weight: 800;
+  padding: 13px 24px;
+  font-size: 0.97rem;
+  font-weight: 700;
   color: #fff;
-  background: linear-gradient(135deg, #2563eb, #0ea5e9);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-  transition: opacity 0.2s, transform 0.1s;
+  background: var(--zen-blue-600, #035AA6);
+  box-shadow: 0 4px 14px rgba(3, 90, 166, 0.18);
+  transition: background 0.2s, transform 0.12s, box-shadow 0.2s;
+  letter-spacing: 0.02em;
 }
 .btn-primary:hover {
-  opacity: 0.9;
+  background: var(--zen-blue-900, #023373);
+  box-shadow: 0 6px 18px rgba(3, 90, 166, 0.28);
 }
 .btn-primary:active {
   transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(3, 90, 166, 0.14);
 }
 
-/* Lists & Sections */
+/* ── 커스텀 태그 셀렉터 ── */
+.tag-selector {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.tag-selector-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 14px;
+  border: 1.5px solid var(--input-border);
+  border-radius: var(--radius-md);
+  background: var(--input-bg);
+  color: var(--color-heading);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  min-width: 88px;
+  transition: all 0.22s ease;
+  white-space: nowrap;
+}
+.tag-selector-btn:hover {
+  border-color: var(--zen-blue-300, #6DA7F2);
+  background: var(--item-hover);
+}
+
+.tag-chevron {
+  margin-left: auto;
+  transition: transform 0.2s ease;
+  opacity: 0.55;
+}
+.tag-chevron.rotated { transform: rotate(180deg); }
+
+.tag-dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  min-width: 100%;
+  background: var(--panel-bg);
+  border: 1.5px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px var(--shadow-color);
+  z-index: 100;
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+}
+
+.tag-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  border-radius: 0;
+  transition: background 0.15s;
+  text-align: left;
+}
+.tag-option:hover { background: var(--item-hover); }
+.tag-option.active {
+  background: rgba(109, 167, 242, 0.15);
+  color: var(--zen-blue-600, #035AA6);
+  font-weight: 700;
+}
+
+/* 태그 색상 점 */
+.tag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+.dot-일반 { background: var(--zen-blue-300, #6DA7F2); }
+.dot-업무 { background: #d97706; }
+.dot-공부 { background: var(--zen-verbena, #B37AD4); }
+
+/* ── Lists & Sections ── */
 .lists-container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 22px;
   margin: 20px 0;
 }
 
 .section-title {
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: 0.98rem;
+  font-weight: 700;
   margin-bottom: 10px;
   display: flex;
   align-items: center;
   gap: 6px;
+  letter-spacing: 0.03em;
 }
 
 .overdue-title { color: var(--title-overdue); }
-.today-title { color: var(--title-today); }
-.done-title { color: var(--title-done); }
+.today-title   { color: var(--title-today); }
+.done-title    { color: var(--title-done); }
 
 .todo-list {
   display: grid;
-  gap: 10px;
+  gap: 9px;
   padding: 0;
   list-style: none;
 }
 
+/* ── Clear button ── */
 .btn-danger-outline {
   width: 100%;
-  padding: 14px;
+  padding: 13px;
   background: transparent;
   color: var(--text-muted);
   border: 1.5px dashed var(--input-border);
-  font-weight: 700;
-  font-size: 0.95rem;
-  transition: all 0.2s;
+  font-weight: 600;
+  font-size: 0.92rem;
+  border-radius: var(--radius-md);
+  transition: all 0.22s ease;
   margin-top: 10px;
 }
-
 .btn-danger-outline:hover {
-  border-color: #ef4444;
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.05);
+  border-color: var(--zen-verbena, #B37AD4);
+  color: var(--zen-verbena, #B37AD4);
+  background: rgba(179, 122, 212, 0.06);
 }
 
+/* ── Memo ── */
 .memo-section {
   margin-top: auto;
   padding-top: 24px;
 }
 
 .memo-title {
-  font-size: 1.1rem;
-  font-weight: 800;
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--color-heading);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   margin-top: 0;
+  letter-spacing: 0.02em;
 }
 
 .memo-input {
   width: 100%;
   height: 100px;
-  padding: 14px 16px;
+  padding: 14px 18px;
   border: 1.5px solid var(--input-border);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: var(--color-heading);
   background: var(--memo-bg);
   resize: vertical;
-  transition: all 0.2s;
+  transition: all 0.22s ease;
   box-sizing: border-box;
 }
-
 .memo-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: var(--zen-blue-300, #6DA7F2);
+  box-shadow: 0 0 0 3px rgba(109, 167, 242, 0.16);
   background: var(--input-bg);
 }
 
-/* Empty State */
+/* ── Empty State ── */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 50px 20px;
-  margin: 30px 0;
+  padding: 52px 20px;
+  margin: 28px 0;
   text-align: center;
   background: var(--item-bg);
-  opacity: 0.95;
   border: 2px dashed var(--panel-border);
-  border-radius: 24px;
+  border-radius: var(--radius-xl);
 }
 
 .empty-icon {
-  font-size: 3.5rem;
+  font-size: 3.2rem;
   margin-bottom: 14px;
-  animation: floatIcon 3s ease-in-out infinite;
+  animation: floatIcon 3.5s ease-in-out infinite;
 }
 
 .empty-state p {
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-size: 1.2rem;
+  font-weight: 700;
   color: var(--color-heading);
   margin: 0 0 8px 0;
 }
 
 .empty-state span {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .empty-action-btn {
-  margin-top: 16px;
-  padding: 10px 20px;
-  border-radius: 12px;
-  background: var(--input-bg);
-  color: #2563eb;
-  border: 1.5px solid #2563eb;
-  font-weight: 800;
+  margin-top: 18px;
+  padding: 10px 22px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--zen-blue-600, #035AA6);
+  border: 1.5px solid var(--zen-blue-300, #6DA7F2);
+  font-weight: 700;
   font-size: 0.9rem;
-  transition: all 0.2s;
+  font-family: inherit;
+  transition: all 0.22s ease;
 }
 .empty-action-btn:hover {
-  background: #eff6ff;
+  background: rgba(109, 167, 242, 0.12);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 4px 14px rgba(3, 90, 166, 0.14);
 }
 
 @keyframes floatIcon {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-9px); }
   100% { transform: translateY(0); }
 }
 
-/* Toast */
+/* ── Toast ── */
 .toast-notification {
   position: fixed;
-  top: 30px;
+  top: 28px;
   left: 50%;
   transform: translateX(-50%);
-  background: #eff6ff;
-  color: #2563eb;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--zen-blue-600, #035AA6);
+  padding: 11px 26px;
+  border-radius: var(--radius-pill);
+  font-size: 0.92rem;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(3, 51, 115, 0.15);
+  border: 1px solid rgba(109, 167, 242, 0.35);
   z-index: 1000;
   white-space: nowrap;
+  backdrop-filter: blur(12px);
 }
 
 .toast-enter-active,
@@ -652,7 +777,7 @@ button {
 .toast-enter-from,
 .toast-leave-to {
   opacity: 0;
-  transform: translate(-50%, -20px);
+  transform: translate(-50%, -18px);
 }
 
 @media (max-width: 640px) {
