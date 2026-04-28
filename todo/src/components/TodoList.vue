@@ -3,6 +3,20 @@ import { computed, ref, nextTick } from 'vue'
 import { selectedDateStr, todosByDate, memosByDate, getDDayText } from '../store.js'
 import TodoItem from './TodoItem.vue'
 
+// ── 커스텀 Confirm 모달 ──
+const confirmState = ref(null) // { message, resolve }
+
+function openConfirm(message) {
+  return new Promise((resolve) => {
+    confirmState.value = { message, resolve }
+  })
+}
+
+function resolveConfirm(result) {
+  confirmState.value?.resolve(result)
+  confirmState.value = null
+}
+
 const todoInput = ref('')
 const todoInputRef = ref(null)
 const tags = ['일반', '업무', '공부']
@@ -149,6 +163,47 @@ function clearCompleted() {
     todosByDate.value[selectedDateStr.value] = list.filter((t) => !t.done)
     showToast(`완료된 ${prevCount}개의 항목을 지웠습니다 🧹`)
   }
+}
+
+// 캘린더에서 선택된 달(YYYY-MM)에 완료된 투두 일괄 삭제
+const currentMonthPrefix = computed(() => {
+  // selectedDateStr은 'YYYY-MM-DD' 형식이므로 앞 7자리만 사용
+  return selectedDateStr.value.slice(0, 7) // e.g. '2026-03'
+})
+
+const thisMonthCompletedCount = computed(() => {
+  let count = 0
+  for (const [date, list] of Object.entries(todosByDate.value)) {
+    if (date.startsWith(currentMonthPrefix.value)) {
+      count += list.filter(t => t.done).length
+    }
+  }
+  return count
+})
+
+async function clearThisMonthCompleted() {
+  if (thisMonthCompletedCount.value === 0) {
+    showToast('이번 달 완료된 항목이 없어요 ✨')
+    return
+  }
+  const ok = await openConfirm(
+    `완료된 투두 ${thisMonthCompletedCount.value}개를 삭제할까요?`
+  )
+  if (!ok) return
+
+  let deleted = 0
+  for (const date of Object.keys(todosByDate.value)) {
+    if (date.startsWith(currentMonthPrefix.value)) {
+      const before = todosByDate.value[date].length
+      todosByDate.value[date] = todosByDate.value[date].filter(t => !t.done)
+      deleted += before - todosByDate.value[date].length
+      // 날짜 키가 완전히 비었으면 제거해서 메모리 절약
+      if (todosByDate.value[date].length === 0) {
+        delete todosByDate.value[date]
+      }
+    }
+  }
+  showToast(`이번 달 완료 항목 ${deleted}개를 정리했습니다 🧹`)
 }
 
 // ── 순서 이동 로직 ──
@@ -359,6 +414,16 @@ function clearDragState() {
       완료된 {{ categorizedTodos.doneList.length }}개 항목 지우기
     </button>
 
+    <button
+      v-if="thisMonthCompletedCount > 0"
+      class="btn-old-clear"
+      type="button"
+      @click="clearThisMonthCompleted"
+      :title="`${currentMonthPrefix} 완료 투두 ${thisMonthCompletedCount}개 삭제`"
+    >
+      🗂️ {{ currentMonthPrefix }} 완료 투두 {{ thisMonthCompletedCount }}개 정리하기
+    </button>
+
     <div class="memo-section">
       <h3 class="memo-title">오늘의 메모</h3>
       <textarea
@@ -372,6 +437,21 @@ function clearDragState() {
     <Transition name="toast">
       <div v-if="toastMsg" class="toast-notification">
         {{ toastMsg }}
+      </div>
+    </Transition>
+
+    <!-- 커스텀 Confirm 모달 -->
+    <Transition name="modal-fade">
+      <div v-if="confirmState" class="confirm-overlay" @click.self="resolveConfirm(false)">
+        <div class="confirm-box">
+          <div class="confirm-icon">🗂️</div>
+          <p class="confirm-message">{{ confirmState.message }}</p>
+          <p class="confirm-sub">삭제 후에는 복구할 수 없습니다.</p>
+          <div class="confirm-actions">
+            <button class="confirm-cancel" @click="resolveConfirm(false)">취소</button>
+            <button class="confirm-ok" @click="resolveConfirm(true)">삭제</button>
+          </div>
+        </div>
       </div>
     </Transition>
   </article>
@@ -652,6 +732,32 @@ button {
   background: rgba(179, 122, 212, 0.06);
 }
 
+/* ── Old completed clear button ── */
+.btn-old-clear {
+  width: 100%;
+  padding: 11px 13px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1.5px dashed color-mix(in srgb, var(--input-border) 80%, transparent);
+  font-weight: 600;
+  font-size: 0.87rem;
+  border-radius: var(--radius-md);
+  transition: all 0.22s ease;
+  margin-top: 8px;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0.8;
+}
+.btn-old-clear:hover {
+  border-color: #e57373;
+  color: #e57373;
+  background: rgba(229, 115, 115, 0.06);
+  opacity: 1;
+}
+
 /* ── Memo ── */
 .memo-section {
   margin-top: auto;
@@ -781,5 +887,115 @@ button {
   .todo-form select {
     width: 100%;
   }
+}
+
+/* ── Confirm 모달 ── */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.confirm-box {
+  background: var(--panel-bg);
+  border: 1.5px solid var(--panel-border);
+  border-radius: var(--radius-xl);
+  padding: 32px 28px 24px;
+  width: 90%;
+  max-width: 340px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.confirm-icon {
+  font-size: 2.4rem;
+  margin-bottom: 4px;
+}
+
+.confirm-message {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-heading);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.confirm-sub {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  margin: 0 0 8px;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.confirm-cancel {
+  flex: 1;
+  padding: 11px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--input-border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.confirm-cancel:hover {
+  background: var(--item-hover);
+  color: var(--color-heading);
+}
+
+.confirm-ok {
+  flex: 1;
+  padding: 11px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: #e57373;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(229, 115, 115, 0.28);
+}
+.confirm-ok:hover {
+  background: #c62828;
+  box-shadow: 0 6px 18px rgba(198, 40, 40, 0.32);
+}
+
+/* 모달 트랜지션 */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.22s ease;
+}
+.modal-fade-enter-active .confirm-box,
+.modal-fade-leave-active .confirm-box {
+  transition: transform 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.22s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+.modal-fade-enter-from .confirm-box,
+.modal-fade-leave-to .confirm-box {
+  transform: scale(0.92) translateY(12px);
+  opacity: 0;
 }
 </style>
