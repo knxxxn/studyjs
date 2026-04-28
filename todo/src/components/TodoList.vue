@@ -378,13 +378,7 @@ function clearDragState() {
 </template>
 
 <style scoped>
-
 /* ── Panel layout ── */
-.scrollable-panel {
-  display: flex;
-  flex-direction: column;
-}
-
 .panel-header {
   display: flex;
   justify-content: space-between;

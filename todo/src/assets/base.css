@@ -88,81 +88,91 @@
   --radius-pill: 999px;
 }
 
-/* ── Dark mode (prefers) ── */
+/* ── Dark mode tokens ── */
+/* prefers-color-scheme 자동 감지 + data-theme="dark" 수동 토글 공통 적용 */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --color-background:      #0e1117;
+
+  :root:not([data-theme="light"]),
+  :root[data-theme="dark"] {
+    --color-background: #0e1117;
     --color-background-soft: #141820;
     --color-background-mute: #1a2030;
 
-    --color-border:       var(--vt-c-divider-dark-2);
+    --color-border: var(--vt-c-divider-dark-2);
     --color-border-hover: var(--vt-c-divider-dark-1);
 
     --color-heading: #e8f0fb;
-    --color-text:    rgba(206, 222, 242, 0.88);
+    --color-text: rgba(206, 222, 242, 0.88);
 
-    --panel-bg:     #1c2540;
+    --panel-bg: #1c2540;
     --panel-border: rgba(109, 167, 242, 0.28);
-    --item-bg:      #182035;
-    --item-hover:   #213050;
-    --input-bg:     rgba(15, 22, 40, 0.85);
+    --item-bg: #182035;
+    --item-hover: #213050;
+    --input-bg: rgba(15, 22, 40, 0.85);
     --input-border: #2a3f68;
-    --memo-bg:      #182035;
+    --memo-bg: #182035;
     --shadow-color: rgba(0, 0, 0, 0.55);
-    --text-muted:   #7997E6;
+    --text-muted: #7997E6;
 
-    --btn-toggle-bg:        rgba(121, 151, 230, 0.18);
-    --btn-toggle-text:      #A0C4F2;
-    --btn-toggle-done-bg:   rgba(32, 106, 188, 0.18);
+    --btn-toggle-bg: rgba(121, 151, 230, 0.18);
+    --btn-toggle-text: #A0C4F2;
+    --btn-toggle-done-bg: rgba(32, 106, 188, 0.18);
     --btn-toggle-done-text: #6DA7F2;
-    --btn-delete-bg:        rgba(179, 122, 212, 0.18);
-    --btn-delete-text:      #CAA9F3;
+    --btn-delete-bg: rgba(179, 122, 212, 0.18);
+    --btn-delete-text: #CAA9F3;
 
-    --title-overdue:  #CAA9F3;
-    --title-today:    #6DA7F2;
-    --title-done:     #2a3f68;
-    --drag-handle:    #7997E6;
-    --arrow-btn-bg:   rgba(160, 196, 242, 0.1);
+    --title-overdue: #CAA9F3;
+    --title-today: #6DA7F2;
+    --title-done: #2a3f68;
+    --drag-handle: #7997E6;
+    --arrow-btn-bg: rgba(160, 196, 242, 0.1);
     --arrow-btn-text: #A0C4F2;
+
+    /* 제목 밝게 */
+    --zen-blue-600: #6DA7F2;
   }
 }
 
-/* ── Dark mode (manual) ── */
+/* 라이트모드로 설정했을 때 다크 시스템 설정 안보이게 */
 :root[data-theme="dark"] {
-  --color-background:      #0e1117;
+  --color-background: #0e1117;
   --color-background-soft: #141820;
   --color-background-mute: #1a2030;
 
-  --color-border:       var(--vt-c-divider-dark-2);
+  --color-border: var(--vt-c-divider-dark-2);
   --color-border-hover: var(--vt-c-divider-dark-1);
 
   --color-heading: #e8f0fb;
-  --color-text:    rgba(206, 222, 242, 0.88);
+  --color-text: rgba(206, 222, 242, 0.88);
 
-  --panel-bg:     #1c2540;
+  --panel-bg: #1c2540;
   --panel-border: rgba(109, 167, 242, 0.28);
-  --item-bg:      #182035;
-  --item-hover:   #213050;
-  --input-bg:     rgba(15, 22, 40, 0.85);
+  --item-bg: #182035;
+  --item-hover: #213050;
+  --input-bg: rgba(15, 22, 40, 0.85);
   --input-border: #2a3f68;
-  --memo-bg:      #182035;
+  --memo-bg: #182035;
   --shadow-color: rgba(0, 0, 0, 0.55);
-  --text-muted:   #7997E6;
+  --text-muted: #7997E6;
 
-  --btn-toggle-bg:        rgba(121, 151, 230, 0.18);
-  --btn-toggle-text:      #A0C4F2;
-  --btn-toggle-done-bg:   rgba(32, 106, 188, 0.18);
+  --btn-toggle-bg: rgba(121, 151, 230, 0.18);
+  --btn-toggle-text: #A0C4F2;
+  --btn-toggle-done-bg: rgba(32, 106, 188, 0.18);
   --btn-toggle-done-text: #6DA7F2;
-  --btn-delete-bg:        rgba(179, 122, 212, 0.18);
-  --btn-delete-text:      #CAA9F3;
+  --btn-delete-bg: rgba(179, 122, 212, 0.18);
+  --btn-delete-text: #CAA9F3;
 
-  --title-overdue:  #CAA9F3;
-  --title-today:    #6DA7F2;
-  --title-done:     #2a3f68;
-  --drag-handle:    #7997E6;
-  --arrow-btn-bg:   rgba(160, 196, 242, 0.1);
+  --title-overdue: #CAA9F3;
+  --title-today: #6DA7F2;
+  --title-done: #2a3f68;
+  --drag-handle: #7997E6;
+  --arrow-btn-bg: rgba(160, 196, 242, 0.1);
   --arrow-btn-text: #A0C4F2;
+
+  /* 제목 밝게 */
+  --zen-blue-600: #6DA7F2;
 }
+
 
 /* ─── Reset ─── */
 *,
@@ -219,22 +229,11 @@ body {
   transition: box-shadow 0.3s ease;
 }
 
-/* ─── Gradient text → flat solid ─── */
+/* ─── Gradient text ─── */
 .gradient-text {
   color: var(--zen-blue-600);
   display: inline-block;
 }
-
-/* 다크모드에서 제목 밝게 */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .gradient-text {
-    color: #6DA7F2;
-  }
-}
-:root[data-theme="dark"] .gradient-text {
-  color: #6DA7F2;
-}
-
 
 /* ─── Dashboard Unified Layout ─── */
 @media (min-width: 860px) {

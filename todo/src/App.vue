@@ -71,7 +71,6 @@ function toggleTheme() {
 
 function changeView(view) {
   currentView.value = view
-  // 뷷 전환 시 항상 사이드바 닫기
   isNavExpanded.value = false
 }
 </script>
@@ -409,11 +408,7 @@ function changeView(view) {
   border-color: rgba(3, 90, 166, 0.4);
 }
 
-.system-btn {
-  background: var(--color-background-mute);
-}
-
-/* ── 다크모드: 사이드바 글자 밝게 ── */
+/* ── 다크모드: 사이드바 ── */
 [data-theme="dark"] .brand h1,
 [data-theme="dark"] .nav-btn,
 [data-theme="dark"] .nav-btn.active,
@@ -474,8 +469,6 @@ function changeView(view) {
   background: rgba(109, 167, 242, 0.28);
   color: #CEDEF2;
 }
-
-
 .app-shell {
   width: 100%;
 }
