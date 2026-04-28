@@ -159,6 +159,37 @@ watch(
 // ── 글로벌 디데이 ──
 export const globalDDay = usePersistedRef(GLOBAL_DDAY_KEY, null)
 
+// globalDDay 변경 시 서버 동기화
+watch(
+  globalDDay,
+  async (newValue) => {
+    if (!userToken.value || isSyncing) return
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+    try {
+      if (newValue && newValue.title && newValue.date) {
+        // D-Day 저장
+        await fetch(`${baseUrl}/api/dday`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${userToken.value}`
+          },
+          body: JSON.stringify(newValue)
+        })
+      } else {
+        // D-Day 삭제
+        await fetch(`${baseUrl}/api/dday`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${userToken.value}` }
+        })
+      }
+    } catch (err) {
+      console.error('백엔드 D-Day 저장 실패:', err)
+    }
+  },
+  { deep: true }
+)
+
 // ── 서버 동기화 ──
 let isSyncing = false  // 서버에서 데이터를 불러오는 중에는 watch가 다시 서버로 보내지 않도록 방지
 
@@ -196,6 +227,17 @@ export async function fetchFromServer() {
       }
       memosByDate.value = merged
       localStorage.setItem(MEMO_STORAGE_KEY, JSON.stringify(merged))
+    }
+
+    // D-Day 불러오기
+    const ddayRes = await fetch(`${baseUrl}/api/dday`, {
+      headers: { 'Authorization': `Bearer ${userToken.value}` }
+    })
+    if (ddayRes.ok) {
+      const serverDDay = await ddayRes.json()
+      if (serverDDay && serverDDay.title && serverDDay.date) {
+        globalDDay.value = serverDDay
+      }
     }
   } catch (err) {
     console.error('서버 데이터 불러오기 실패:', err)

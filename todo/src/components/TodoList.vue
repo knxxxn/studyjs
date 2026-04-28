@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, nextTick } from 'vue'
-import { selectedDateStr, todosByDate, memosByDate, getDDayText } from '../store.js'
+import { selectedDateStr, todosByDate, memosByDate, getDDayText, globalDDay } from '../store.js'
 import TodoItem from './TodoItem.vue'
 
 // ── 커스텀 Confirm 모달 ──
@@ -131,9 +131,28 @@ function toggleTodo(todo) {
 function toggleDDay(todo) {
   const list = todosByDate.value[todo._dateKey]
   const target = list.find((item) => item.id === todo.id)
-  if (target) {
-    target.isDDay = !target.isDDay
-    showToast(target.isDDay ? 'D-Day로 지정했습니다 🚩' : 'D-Day 지정을 해제했습니다.')
+  if (!target) return
+
+  const settingOn = !target.isDDay
+
+  if (settingOn) {
+    // 기존 D-Day 투두 모두 해제 (단일 D-Day 유지)
+    for (const list of Object.values(todosByDate.value)) {
+      for (const t of list) {
+        if (t.isDDay) t.isDDay = false
+      }
+    }
+    target.isDDay = true
+    // globalDDay 연동: 투두 텍스트와 날짜로 설정
+    globalDDay.value = { title: target.text, date: todo._dateKey }
+    showToast('D-Day로 지정했습니다 🚩')
+  } else {
+    target.isDDay = false
+    // 이 투두가 globalDDay와 연결된 경우 같이 해제
+    if (globalDDay.value?.date === todo._dateKey && globalDDay.value?.title === target.text) {
+      globalDDay.value = null
+    }
+    showToast('D-Day 지정을 해제했습니다.')
   }
 }
 
@@ -148,6 +167,11 @@ function updateTodoText(todo, newText) {
 
 function removeTodoQuietly(todo) {
   const list = todosByDate.value[todo._dateKey]
+  const target = list.find(t => t.id === todo.id)
+  // D-Day 투두 삭제 시 globalDDay도 해제
+  if (target?.isDDay) {
+    globalDDay.value = null
+  }
   todosByDate.value[todo._dateKey] = list.filter((t) => t.id !== todo.id)
 }
 
@@ -159,8 +183,10 @@ function removeTodo(todo) {
 function clearCompleted() {
   const list = todosByDate.value[selectedDateStr.value]
   if (list) {
+    const removingDDay = list.some(t => t.done && t.isDDay)
     const prevCount = list.filter(t => t.done).length
     todosByDate.value[selectedDateStr.value] = list.filter((t) => !t.done)
+    if (removingDDay) globalDDay.value = null
     showToast(`완료된 ${prevCount}개의 항목을 지웠습니다 🧹`)
   }
 }
@@ -192,8 +218,10 @@ async function clearThisMonthCompleted() {
   if (!ok) return
 
   let deleted = 0
+  let removedDDay = false
   for (const date of Object.keys(todosByDate.value)) {
     if (date.startsWith(currentMonthPrefix.value)) {
+      if (todosByDate.value[date].some(t => t.done && t.isDDay)) removedDDay = true
       const before = todosByDate.value[date].length
       todosByDate.value[date] = todosByDate.value[date].filter(t => !t.done)
       deleted += before - todosByDate.value[date].length
@@ -203,6 +231,7 @@ async function clearThisMonthCompleted() {
       }
     }
   }
+  if (removedDDay) globalDDay.value = null
   showToast(`이번 달 완료 항목 ${deleted}개를 정리했습니다 🧹`)
 }
 

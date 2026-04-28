@@ -536,6 +536,12 @@ function changeView(view) {
     margin: 0;
     border-radius: 999px;
   }
+  /* 모바일 collapsed 시 내부 요소가 공간을 차지하지 않도록 */
+  .sidebar.collapsed .nav-menu,
+  .sidebar.collapsed .auth-section,
+  .sidebar.collapsed .sidebar-footer {
+    display: none;
+  }
   .mobile-theme-btn {
     display: flex;
   }
