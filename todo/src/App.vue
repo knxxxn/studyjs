@@ -4,13 +4,31 @@ import TodoList from './components/TodoList.vue'
 import Weather from './components/Weather.vue'
 import NewsDashboard from './components/NewsDashboard.vue'
 import LoginModal from './components/LoginModal.vue'
-import { userToken, userName, fetchFromServer } from './store.js'
+import { userToken, userName, fetchFromServer, deletedItemsCount } from './store.js'
 
 // 페이지 로드 시 이미 로그인되어 있으면 서버에서 데이터 불러오기
 onMounted(() => {
   if (userToken.value) {
     fetchFromServer()
   }
+
+  // 자동 삭제된 데이터가 있으면 알림
+  if (deletedItemsCount.value > 0) {
+    showToast(`1년이 지나 오래된 데이터 ${deletedItemsCount.value}개가 자동 삭제되었습니다 🧹`)
+  }
+
+  // 로그인 세션 만료 이벤트 리스너
+  window.addEventListener('auth-expired', () => {
+    showToast('로그인 세션이 만료되어 다시 로그인해주세요 🔐')
+  })
+
+  // 서버 슬립모드 콜드스타트 이벤트 리스너
+  window.addEventListener('server-waking', () => {
+    serverWaking.value = true
+  })
+  window.addEventListener('server-awake', () => {
+    serverWaking.value = false
+  })
 })
 
 const theme = ref(localStorage.getItem('user-theme') || 'light')
@@ -18,7 +36,9 @@ const theme = ref(localStorage.getItem('user-theme') || 'light')
 const currentView = ref('dashboard')
 const isNavExpanded = ref(false)
 const showLoginModal = ref(false)
+const showDeleteModal = ref(false)
 const toastMsg = ref('')
+const serverWaking = ref(false)
 let toastTimer = null
 
 function showToast(msg) {
@@ -33,11 +53,12 @@ function handleLogout() {
   showToast('로그아웃 되었습니다 👋')
 }
 
-async function handleDeleteAccount() {
-  const confirmed = window.confirm(
-    '정말로 회원 탈퇴하시겠습니까?\n\n모든 투두, 메모, 캘린더 데이터가 영구 삭제되며 복구할 수 없습니다.'
-  )
-  if (!confirmed) return
+function handleDeleteAccount() {
+  showDeleteModal.value = true
+}
+
+async function confirmDeleteAccount() {
+  showDeleteModal.value = false
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
   try {
@@ -77,6 +98,14 @@ function changeView(view) {
 
 <template>
   <div class="layout-wrapper dashboard-unified">
+    <!-- Server Waking Banner -->
+    <Transition name="fade">
+      <div v-if="serverWaking" class="server-waking-banner">
+        <div class="spinner"></div>
+        <span>서버가 깨어나는 중입니다. 잠시만 기다려주세요 ☕</span>
+      </div>
+    </Transition>
+
     <aside class="sidebar panel" :class="{ 'collapsed': !isNavExpanded }">
       <div class="brand">
         <button class="hamburger-btn" @click="isNavExpanded = !isNavExpanded" title="메뉴 토글">
@@ -139,6 +168,18 @@ function changeView(view) {
       :show="showLoginModal" 
       @close="showLoginModal = false" 
     />
+
+    <!-- Delete Account Modal -->
+    <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
+      <div class="modal-content">
+        <h3 class="modal-title">정말로 회원 탈퇴하시겠습니까?</h3>
+        <p class="modal-desc">모든 투두, 메모, 캘린더 데이터가 영구 삭제되며<br/>복구할 수 없습니다</p>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" @click="showDeleteModal = false">취소</button>
+          <button type="button" class="btn-delete" @click="confirmDeleteAccount">확인</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Toast Notification -->
     <Transition name="toast">
@@ -581,5 +622,130 @@ function changeView(view) {
 .toast-leave-to {
   opacity: 0;
   transform: translate(-50%, -18px);
+}
+
+/* ── 회원 탈퇴 모달 ── */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2500;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: var(--color-background);
+  color: var(--color-text);
+  padding: 28px 24px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 360px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+[data-theme="dark"] .modal-content {
+  background: #1e293b;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.modal-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-heading);
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.modal-desc {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 11px 0;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-cancel:hover {
+  background: var(--color-background-soft);
+}
+
+.btn-delete {
+  flex: 1;
+  padding: 11px 0;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: #dc2626;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-delete:hover {
+  background: #b91c1c;
+}
+
+/* ── 서버 로딩 배너 ── */
+.server-waking-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(3, 90, 166, 0.95);
+  color: white;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 3000;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 16px rgba(3, 51, 115, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

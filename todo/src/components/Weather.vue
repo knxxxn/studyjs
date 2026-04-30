@@ -505,15 +505,15 @@ onUnmounted(() => {
 
 /* ── 날씨 조건별 배경 (낮) ── */
 
-/* 맑음 낮 — 맑고 따뜻한 하늘 */
+/* 맑음 낮 — 청명하고 상쾌한 푸른 하늘 */
 .weather-card.wx-sunny-day {
-  color: #3d2600;
-  background: linear-gradient(150deg, #74C0FC 0%, #FFE066 55%, #FFB347 100%);
+  color: #0A3A66;
+  background: linear-gradient(135deg, #8ED6FF 0%, #44A0EB 100%);
   box-shadow: inset 0 2px 16px rgba(255, 255, 255, 0.5);
 }
 .weather-card.wx-sunny-day .condition,
 .weather-card.wx-sunny-day .weather-summary,
-.weather-card.wx-sunny-day .fetched-at { color: rgba(61, 38, 0, 0.62); }
+.weather-card.wx-sunny-day .fetched-at { color: rgba(10, 58, 102, 0.75); }
 
 /* 구름조금 낮 — 연하고 맑은 파랑 */
 .weather-card.wx-partcloud-day {

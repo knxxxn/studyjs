@@ -28,12 +28,16 @@ const STORAGE_KEY = 'studyjs-todos'
 const MEMO_STORAGE_KEY = 'studyjs-memos'
 const GLOBAL_DDAY_KEY = 'studyjs-global-dday'
 
-const CLEANUP_THRESHOLD_DAYS = 180
+const CLEANUP_THRESHOLD_DAYS = 365
+
+export const deletedItemsCount = ref(0)
 
 function cleanOldData() {
   const cutoff = new Date()
   cutoff.setDate(cutoff.getDate() - CLEANUP_THRESHOLD_DAYS)
   const cutoffStr = formatDate(cutoff)
+
+  let deletedCount = 0
 
   // 투두 & 메모 정리
   for (const key of [STORAGE_KEY, MEMO_STORAGE_KEY]) {
@@ -46,6 +50,7 @@ function cleanOldData() {
       let changed = false
       for (const date in parsed) {
         if (date < cutoffStr) {
+          deletedCount++
           delete parsed[date]
           changed = true
         }
@@ -64,11 +69,37 @@ function cleanOldData() {
       if (parsed?.date && parsed.date < cutoffStr) {
         localStorage.removeItem(GLOBAL_DDAY_KEY)
       }
-    } catch (e) {}
+    } catch (e) { }
   }
+
+  deletedItemsCount.value = deletedCount
 }
 
 cleanOldData()
+
+// ── 인증 에러 핸들러 ──
+export function handleAuthError(res) {
+  if (res.status === 401) {
+    userToken.value = null
+    userName.value = ''
+    window.dispatchEvent(new CustomEvent('auth-expired'))
+    return true
+  }
+  return false
+}
+
+// ── API Fetch 래퍼 (서버 슬립모드 콜드스타트 감지) ──
+async function apiFetch(url, options) {
+  const coldStartTimer = setTimeout(() => {
+    window.dispatchEvent(new CustomEvent('server-waking'))
+  }, 3000)
+  try {
+    return await fetch(url, options)
+  } finally {
+    clearTimeout(coldStartTimer)
+    window.dispatchEvent(new CustomEvent('server-awake'))
+  }
+}
 
 // ── 투두 ──
 // 예전에 배열 형태로 저장되었을 가능성에 대비한 마이그레이션 적용
@@ -82,7 +113,7 @@ if (savedTodos) {
     } else {
       initialTodos = parsed
     }
-  } catch(e) {}
+  } catch (e) { }
 }
 
 export const todosByDate = ref(initialTodos)
@@ -103,7 +134,7 @@ watch(
     if (userToken.value && !isSyncing) {
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
       try {
-        await fetch(`${baseUrl}/api/todos`, {
+        const res = await apiFetch(`${baseUrl}/api/todos`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -111,6 +142,7 @@ watch(
           },
           body: JSON.stringify(dataToSave)
         })
+        handleAuthError(res)
       } catch (err) {
         console.error('백엔드 투두 저장 실패:', err)
       }
@@ -123,7 +155,7 @@ watch(
 export const memosByDate = ref({})
 const savedMemos = localStorage.getItem(MEMO_STORAGE_KEY)
 if (savedMemos) {
-  try { memosByDate.value = JSON.parse(savedMemos) } catch(e) {}
+  try { memosByDate.value = JSON.parse(savedMemos) } catch (e) { }
 }
 
 watch(
@@ -140,7 +172,7 @@ watch(
     if (userToken.value && !isSyncing) {
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
       try {
-        await fetch(`${baseUrl}/api/memos`, {
+        const res = await apiFetch(`${baseUrl}/api/memos`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -148,6 +180,7 @@ watch(
           },
           body: JSON.stringify(dataToSave)
         })
+        handleAuthError(res)
       } catch (err) {
         console.error('백엔드 메모 저장 실패:', err)
       }
@@ -166,9 +199,10 @@ watch(
     if (!userToken.value || isSyncing) return
     const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
     try {
+      let res;
       if (newValue && newValue.title && newValue.date) {
         // D-Day 저장
-        await fetch(`${baseUrl}/api/dday`, {
+        res = await apiFetch(`${baseUrl}/api/dday`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -178,11 +212,12 @@ watch(
         })
       } else {
         // D-Day 삭제
-        await fetch(`${baseUrl}/api/dday`, {
+        res = await apiFetch(`${baseUrl}/api/dday`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${userToken.value}` }
         })
       }
+      handleAuthError(res)
     } catch (err) {
       console.error('백엔드 D-Day 저장 실패:', err)
     }
@@ -195,15 +230,17 @@ let isSyncing = false  // 서버에서 데이터를 불러오는 중에는 watch
 
 export async function fetchFromServer() {
   if (!userToken.value) return
-  
+
   isSyncing = true
   const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
-  
+
   try {
     // 투두 불러오기
-    const todosRes = await fetch(`${baseUrl}/api/todos`, {
+    const todosRes = await apiFetch(`${baseUrl}/api/todos`, {
       headers: { 'Authorization': `Bearer ${userToken.value}` }
     })
+    if (handleAuthError(todosRes)) return
+    
     if (todosRes.ok) {
       const serverTodos = await todosRes.json()
       // 서버 데이터와 로컬 데이터 병합 (서버 데이터 우선)
@@ -214,11 +251,13 @@ export async function fetchFromServer() {
       todosByDate.value = merged
       localStorage.setItem(STORAGE_KEY, JSON.stringify(merged))
     }
-    
+
     // 메모 불러오기
-    const memosRes = await fetch(`${baseUrl}/api/memos`, {
+    const memosRes = await apiFetch(`${baseUrl}/api/memos`, {
       headers: { 'Authorization': `Bearer ${userToken.value}` }
     })
+    if (handleAuthError(memosRes)) return
+    
     if (memosRes.ok) {
       const serverMemos = await memosRes.json()
       const merged = { ...memosByDate.value }
@@ -230,9 +269,11 @@ export async function fetchFromServer() {
     }
 
     // D-Day 불러오기
-    const ddayRes = await fetch(`${baseUrl}/api/dday`, {
+    const ddayRes = await apiFetch(`${baseUrl}/api/dday`, {
       headers: { 'Authorization': `Bearer ${userToken.value}` }
     })
+    if (handleAuthError(ddayRes)) return
+    
     if (ddayRes.ok) {
       const serverDDay = await ddayRes.json()
       if (serverDDay && serverDDay.title && serverDDay.date) {
