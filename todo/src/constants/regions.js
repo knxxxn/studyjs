@@ -1,5 +1,6 @@
 export const REGIONS = [
   { name: '서울', nx: 60, ny: 127 },
+  { name: '경기', nx: 60, ny: 121 },
   { name: '부산', nx: 98, ny: 76 },
   { name: '제주', nx: 52, ny: 38 },
   { name: '인천', nx: 55, ny: 124 },
