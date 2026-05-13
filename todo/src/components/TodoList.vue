@@ -431,9 +431,9 @@ function clearDragState() {
 
     <!-- Empty State -->
     <div class="empty-state" v-else>
-      <div class="empty-icon">🌱</div>
+      <div class="empty-icon">📅</div>
       <p>표시할 일정이 없네요!</p>
-      <span>카테고리 태그와 함께 첫 할 일을 추가해보세요.</span>
+      <span>카테고리 태그와 함께 할 일을 추가해보세요</span>
       <button class="empty-action-btn" type="button" @click="todoInputRef?.focus()">
         할 일 등록하기 ⚡
       </button>

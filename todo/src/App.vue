@@ -22,6 +22,11 @@ onMounted(() => {
     showToast('로그인 세션이 만료되어 다시 로그인해주세요 🔐')
   })
 
+  // 커스텀 토스트 이벤트 리스너 추가
+  window.addEventListener('show-toast', (e) => {
+    showToast(e.detail)
+  })
+
   // 서버 슬립모드 콜드스타트 이벤트 리스너
   window.addEventListener('server-waking', () => {
     serverWaking.value = true
